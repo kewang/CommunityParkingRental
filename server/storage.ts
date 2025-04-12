@@ -7,7 +7,12 @@ import {
   InsertRental,
   ActivityLog,
   InsertActivityLog,
-  SPACE_STATUS
+  SPACE_STATUS,
+  RentalRequest,
+  InsertRentalRequest,
+  ParkingOffer,
+  InsertParkingOffer,
+  REQUEST_STATUS
 } from "@shared/schema";
 
 export interface IStorage {
@@ -51,6 +56,16 @@ export interface IStorage {
     maintenanceSpaces: number;
     activeRentalsCount: number;
   }>;
+  
+  // Rental Request methods (for simplified parking system)
+  getAllRentalRequests(): Promise<RentalRequest[]>;
+  getRentalRequestById(id: number): Promise<RentalRequest | undefined>;
+  createRentalRequest(request: InsertRentalRequest): Promise<RentalRequest>;
+  updateRentalRequestStatus(id: number, status: keyof typeof REQUEST_STATUS): Promise<RentalRequest | undefined>;
+  
+  // Parking Offer methods (for simplified parking system)
+  getParkingOffersByRequestId(requestId: number): Promise<ParkingOffer[]>;
+  createParkingOffer(offer: InsertParkingOffer): Promise<ParkingOffer>;
 }
 
 export class MemStorage implements IStorage {
@@ -58,22 +73,30 @@ export class MemStorage implements IStorage {
   private households: Map<number, Household>;
   private rentals: Map<number, Rental>;
   private activityLogs: Map<number, ActivityLog>;
+  private rentalRequests: Map<number, RentalRequest>;
+  private parkingOffers: Map<number, ParkingOffer>;
   
   private parkingSpaceCurrentId: number;
   private householdCurrentId: number;
   private rentalCurrentId: number;
   private activityLogCurrentId: number;
+  private rentalRequestCurrentId: number;
+  private parkingOfferCurrentId: number;
   
   constructor() {
     this.parkingSpaces = new Map();
     this.households = new Map();
     this.rentals = new Map();
     this.activityLogs = new Map();
+    this.rentalRequests = new Map();
+    this.parkingOffers = new Map();
     
     this.parkingSpaceCurrentId = 1;
     this.householdCurrentId = 1;
     this.rentalCurrentId = 1;
     this.activityLogCurrentId = 1;
+    this.rentalRequestCurrentId = 1;
+    this.parkingOfferCurrentId = 1;
     
     // Initialize with some default data
     this.initializeData();

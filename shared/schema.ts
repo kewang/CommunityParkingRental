@@ -4,9 +4,17 @@ import { z } from "zod";
 
 // Status options for a parking space
 export const SPACE_STATUS = {
-  AVAILABLE: "available",
-  OCCUPIED: "occupied",
-  MAINTENANCE: "maintenance"
+  AVAILABLE: "AVAILABLE",
+  OCCUPIED: "OCCUPIED",
+  MAINTENANCE: "MAINTENANCE"
+} as const;
+
+// Status options for a rental request
+export const REQUEST_STATUS = {
+  PENDING: "PENDING",
+  MATCHED: "MATCHED",
+  EXPIRED: "EXPIRED",
+  CANCELLED: "CANCELLED"
 } as const;
 
 // Parking spaces table
@@ -71,6 +79,43 @@ export const insertActivityLogSchema = createInsertSchema(activityLogs).omit({
   timestamp: true,
 });
 
+// Rental Requests table (for the simplified parking request system)
+export const rentalRequests = pgTable("rental_requests", {
+  id: serial("id").primaryKey(),
+  name: text("name").notNull(),
+  contact: text("contact").notNull(),
+  licensePlate: text("license_plate").notNull(),
+  startDate: date("start_date").notNull(),
+  endDate: date("end_date").notNull(),
+  notes: text("notes"),
+  status: text("status").notNull().$type<keyof typeof REQUEST_STATUS>().default(REQUEST_STATUS.PENDING),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+});
+
+// Insert schema for rental requests
+export const insertRentalRequestSchema = createInsertSchema(rentalRequests).omit({
+  id: true,
+  status: true,
+  createdAt: true,
+});
+
+// Parking Offers table (for the simplified parking request system)
+export const parkingOffers = pgTable("parking_offers", {
+  id: serial("id").primaryKey(),
+  requestId: integer("request_id").notNull(),
+  spaceNumber: text("space_number").notNull(),
+  ownerName: text("owner_name").notNull(),
+  ownerContact: text("owner_contact").notNull(),
+  notes: text("notes"),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+});
+
+// Insert schema for parking offers
+export const insertParkingOfferSchema = createInsertSchema(parkingOffers).omit({
+  id: true,
+  createdAt: true,
+});
+
 // Define the types
 export type ParkingSpace = typeof parkingSpaces.$inferSelect;
 export type InsertParkingSpace = z.infer<typeof insertParkingSpaceSchema>;
@@ -83,6 +128,12 @@ export type InsertRental = z.infer<typeof insertRentalSchema>;
 
 export type ActivityLog = typeof activityLogs.$inferSelect;
 export type InsertActivityLog = z.infer<typeof insertActivityLogSchema>;
+
+export type RentalRequest = typeof rentalRequests.$inferSelect;
+export type InsertRentalRequest = z.infer<typeof insertRentalRequestSchema>;
+
+export type ParkingOffer = typeof parkingOffers.$inferSelect;
+export type InsertParkingOffer = z.infer<typeof insertParkingOfferSchema>;
 
 // Extended schemas with additional validations for forms
 export const parkingSpaceFormSchema = insertParkingSpaceSchema.extend({
@@ -101,4 +152,25 @@ export const rentalFormSchema = insertRentalSchema.extend({
 
 export const householdFormSchema = insertHouseholdSchema.extend({
   householdNumber: z.string().min(1, "戶號不可為空 / Household number is required"),
+});
+
+// Rental request form schema
+export const rentalRequestFormSchema = z.object({
+  name: z.string().min(1, "請輸入姓名"),
+  contact: z.string().min(1, "請輸入聯絡方式"),
+  licensePlate: z.string().min(1, "請輸入車牌號碼"),
+  startDate: z.date().min(new Date(new Date().setHours(0, 0, 0, 0)), "開始日期不能早於今天"),
+  endDate: z.date(),
+  notes: z.string().optional(),
+}).refine((data) => data.endDate > data.startDate, {
+  message: "結束日期必須在開始日期之後",
+  path: ["endDate"],
+});
+
+// Parking offer form schema
+export const parkingOfferFormSchema = z.object({
+  spaceNumber: z.string().min(1, "請輸入車位編號"),
+  ownerName: z.string().min(1, "請輸入姓名"),
+  ownerContact: z.string().min(1, "請輸入聯絡方式"),
+  notes: z.string().optional(),
 });
