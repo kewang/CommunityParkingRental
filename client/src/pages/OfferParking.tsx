@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -23,7 +23,7 @@ import {
 import { format } from "date-fns";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
-import { CheckCircle2, Car, Calendar, User, Phone } from "lucide-react";
+import { CheckCircle2, Car, Calendar, User } from "lucide-react";
 
 // 定義表單驗證規則
 const parkingOfferSchema = z.object({
@@ -35,25 +35,25 @@ const parkingOfferSchema = z.object({
 
 type ParkingOfferValues = z.infer<typeof parkingOfferSchema>;
 
+// 定義租借請求類型
+interface RentalRequest {
+  id: number;
+  name: string;
+  contact: string;
+  licensePlate: string;
+  startDate: string;
+  endDate: string;
+  notes: string | null;
+  status: string;
+  createdAt: string;
+}
+
 const OfferParking = () => {
   const { t } = useTranslation();
   const { toast } = useToast();
   const [isSubmitted, setIsSubmitted] = useState(false);
   const [match, params] = useRoute<{ requestId: string }>("/offer-parking/:requestId");
   const requestId = match ? params.requestId : null;
-
-  // 定義類型
-  interface RentalRequest {
-    id: number;
-    name: string;
-    contact: string;
-    licensePlate: string;
-    startDate: string;
-    endDate: string;
-    notes: string | null;
-    status: string;
-    createdAt: string;
-  }
 
   // 獲取租借請求資訊
   const { data: requestData, isLoading, error } = useQuery<RentalRequest>({
@@ -177,6 +177,7 @@ const OfferParking = () => {
     );
   }
 
+  // 顯示主要頁面內容
   return (
     <div className="container max-w-md mx-auto py-10">
       <h1 className="text-2xl font-bold text-center mb-6">提供車位出租</h1>
@@ -334,7 +335,7 @@ const OfferParking = () => {
             </Form>
           </CardContent>
         </Card>
-      )}
+      ) : null}
     </div>
   );
 };

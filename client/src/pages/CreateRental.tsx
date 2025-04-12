@@ -56,10 +56,23 @@ const CreateRental = () => {
     },
   });
 
+  // 定義類型
+  interface RentalRequestResponse {
+    id: number;
+    name: string;
+    contact: string;
+    licensePlate: string;
+    startDate: string;
+    endDate: string;
+    notes: string | null;
+    status: string;
+    createdAt: string;
+  }
+
   // 生成租借請求的 Mutation
-  const mutation = useMutation({
+  const mutation = useMutation<RentalRequestResponse, Error, RentalRequestValues>({
     mutationFn: async (values: RentalRequestValues) => {
-      const response = await apiRequest('POST', '/api/rental-requests', values);
+      const response = await apiRequest<RentalRequestResponse>('POST', '/api/rental-requests', values);
       return response;
     },
     onSuccess: (data) => {

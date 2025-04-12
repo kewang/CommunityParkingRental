@@ -7,6 +7,8 @@ import Dashboard from "@/pages/Dashboard";
 import ParkingSpaces from "@/pages/ParkingSpaces";
 import Rentals from "@/pages/Rentals";
 import Households from "@/pages/Households";
+import CreateRental from "@/pages/CreateRental";
+import OfferParking from "@/pages/OfferParking";
 import Layout from "@/components/Layout";
 import { useState } from "react";
 
@@ -17,6 +19,8 @@ function Router() {
       <Route path="/parking-spaces" component={ParkingSpaces} />
       <Route path="/rentals" component={Rentals} />
       <Route path="/households" component={Households} />
+      <Route path="/create-rental" component={CreateRental} />
+      <Route path="/offer-parking/:requestId" component={OfferParking} />
       <Route component={NotFound} />
     </Switch>
   );
