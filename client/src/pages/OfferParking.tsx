@@ -72,10 +72,21 @@ const OfferParking = () => {
     },
   });
 
+  // 定義ParkingOffer類型
+  interface ParkingOfferResponse {
+    id: number;
+    requestId: number;
+    spaceNumber: string;
+    ownerName: string;
+    ownerContact: string;
+    notes: string | null;
+    createdAt: string;
+  }
+
   // 確認車位的 Mutation
-  const mutation = useMutation({
+  const mutation = useMutation<ParkingOfferResponse, Error, ParkingOfferValues>({
     mutationFn: async (values: ParkingOfferValues) => {
-      return await apiRequest('POST', `/api/rental-requests/${requestId}/offers`, values);
+      return await apiRequest<ParkingOfferResponse>('POST', `/api/rental-requests/${requestId}/offers`, values);
     },
     onSuccess: () => {
       setIsSubmitted(true);

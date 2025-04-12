@@ -72,8 +72,7 @@ const CreateRental = () => {
   // 生成租借請求的 Mutation
   const mutation = useMutation<RentalRequestResponse, Error, RentalRequestValues>({
     mutationFn: async (values: RentalRequestValues) => {
-      const response = await apiRequest<RentalRequestResponse>('POST', '/api/rental-requests', values);
-      return response;
+      return await apiRequest<RentalRequestResponse>('POST', '/api/rental-requests', values);
     },
     onSuccess: (data) => {
       // 產生分享連結
