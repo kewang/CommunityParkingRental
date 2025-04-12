@@ -5,7 +5,10 @@ import {
   parkingSpaceFormSchema, 
   rentalFormSchema, 
   householdFormSchema,
-  SPACE_STATUS
+  rentalRequestFormSchema,
+  parkingOfferFormSchema,
+  SPACE_STATUS,
+  REQUEST_STATUS
 } from "@shared/schema";
 import { fromZodError } from "zod-validation-error";
 
@@ -317,6 +320,105 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.json(stats);
     } catch (error) {
       res.status(500).json({ message: 'Error fetching dashboard statistics' });
+    }
+  });
+  
+  // ==== Rental Request Routes (for simplified parking system) ====
+  
+  // Get all rental requests
+  app.get('/api/rental-requests', async (req, res) => {
+    try {
+      const requests = await storage.getAllRentalRequests();
+      res.json(requests);
+    } catch (error) {
+      res.status(500).json({ message: 'Error fetching rental requests' });
+    }
+  });
+  
+  // Get rental request by ID
+  app.get('/api/rental-requests/:id', async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      const request = await storage.getRentalRequestById(id);
+      
+      if (!request) {
+        return res.status(404).json({ message: '找不到租借申請 / Rental request not found' });
+      }
+      
+      res.json(request);
+    } catch (error) {
+      res.status(500).json({ message: 'Error fetching rental request' });
+    }
+  });
+  
+  // Create new rental request
+  app.post('/api/rental-requests', validateRequest(rentalRequestFormSchema), async (req, res) => {
+    try {
+      const newRequest = await storage.createRentalRequest(req.body);
+      res.status(201).json(newRequest);
+    } catch (error) {
+      res.status(500).json({ message: 'Error creating rental request' });
+    }
+  });
+  
+  // Update rental request status
+  app.put('/api/rental-requests/:id/status', async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      const { status } = req.body;
+      
+      if (!Object.values(REQUEST_STATUS).includes(status)) {
+        return res.status(400).json({ message: '無效的狀態 / Invalid status' });
+      }
+      
+      const updatedRequest = await storage.updateRentalRequestStatus(id, status);
+      
+      if (!updatedRequest) {
+        return res.status(404).json({ message: '找不到租借申請 / Rental request not found' });
+      }
+      
+      res.json(updatedRequest);
+    } catch (error) {
+      res.status(500).json({ message: 'Error updating rental request status' });
+    }
+  });
+  
+  // ==== Parking Offer Routes (for simplified parking system) ====
+  
+  // Get parking offers by request ID
+  app.get('/api/rental-requests/:requestId/offers', async (req, res) => {
+    try {
+      const requestId = parseInt(req.params.requestId);
+      const offers = await storage.getParkingOffersByRequestId(requestId);
+      res.json(offers);
+    } catch (error) {
+      res.status(500).json({ message: 'Error fetching parking offers' });
+    }
+  });
+  
+  // Create new parking offer
+  app.post('/api/rental-requests/:requestId/offers', validateRequest(parkingOfferFormSchema), async (req, res) => {
+    try {
+      const requestId = parseInt(req.params.requestId);
+      const request = await storage.getRentalRequestById(requestId);
+      
+      if (!request) {
+        return res.status(404).json({ message: '找不到租借申請 / Rental request not found' });
+      }
+      
+      if (request.status !== REQUEST_STATUS.PENDING) {
+        return res.status(400).json({ message: '租借申請不再接受新的報價 / Rental request is no longer accepting offers' });
+      }
+      
+      const offerData = {
+        ...req.body,
+        requestId
+      };
+      
+      const newOffer = await storage.createParkingOffer(offerData);
+      res.status(201).json(newOffer);
+    } catch (error) {
+      res.status(500).json({ message: 'Error creating parking offer' });
     }
   });
   

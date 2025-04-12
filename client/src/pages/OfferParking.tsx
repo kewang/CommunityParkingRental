@@ -42,8 +42,21 @@ const OfferParking = () => {
   const [match, params] = useRoute<{ requestId: string }>("/offer-parking/:requestId");
   const requestId = match ? params.requestId : null;
 
+  // 定義類型
+  interface RentalRequest {
+    id: number;
+    name: string;
+    contact: string;
+    licensePlate: string;
+    startDate: string;
+    endDate: string;
+    notes: string | null;
+    status: string;
+    createdAt: string;
+  }
+
   // 獲取租借請求資訊
-  const { data: requestData, isLoading, error } = useQuery({
+  const { data: requestData, isLoading, error } = useQuery<RentalRequest>({
     queryKey: ['/api/rental-requests', requestId],
     enabled: !!requestId,
   });
@@ -62,7 +75,7 @@ const OfferParking = () => {
   // 確認車位的 Mutation
   const mutation = useMutation({
     mutationFn: async (values: ParkingOfferValues) => {
-      return await apiRequest('POST', `/api/rental-requests/${requestId}/offer`, values);
+      return await apiRequest('POST', `/api/rental-requests/${requestId}/offers`, values);
     },
     onSuccess: () => {
       setIsSubmitted(true);
@@ -168,7 +181,7 @@ const OfferParking = () => {
     <div className="container max-w-md mx-auto py-10">
       <h1 className="text-2xl font-bold text-center mb-6">提供車位出租</h1>
       
-      {isSubmitted ? (
+      {isSubmitted && requestData ? (
         <Card>
           <CardHeader>
             <CardTitle>確認成功</CardTitle>
@@ -211,7 +224,7 @@ const OfferParking = () => {
             </Button>
           </CardFooter>
         </Card>
-      ) : (
+      ) : requestData ? (
         <Card>
           <CardHeader>
             <CardTitle>租借詳情</CardTitle>

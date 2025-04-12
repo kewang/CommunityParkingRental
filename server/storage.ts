@@ -435,6 +435,84 @@ export class MemStorage implements IStorage {
       activeRentalsCount
     };
   }
+  
+  // Rental Request methods (for simplified parking system)
+  async getAllRentalRequests(): Promise<RentalRequest[]> {
+    return Array.from(this.rentalRequests.values());
+  }
+  
+  async getRentalRequestById(id: number): Promise<RentalRequest | undefined> {
+    return this.rentalRequests.get(id);
+  }
+  
+  async createRentalRequest(request: InsertRentalRequest): Promise<RentalRequest> {
+    const id = this.rentalRequestCurrentId++;
+    const newRequest: RentalRequest = {
+      ...request,
+      id,
+      status: REQUEST_STATUS.PENDING,
+      createdAt: new Date()
+    };
+    this.rentalRequests.set(id, newRequest);
+    
+    // Log the activity
+    await this.createActivityLog({
+      activityType: "REQUEST_CREATED",
+      description: `新增租借申請: ${request.name} (${request.licensePlate})`,
+      relatedId: id
+    });
+    
+    return newRequest;
+  }
+  
+  async updateRentalRequestStatus(id: number, status: keyof typeof REQUEST_STATUS): Promise<RentalRequest | undefined> {
+    const existingRequest = this.rentalRequests.get(id);
+    if (!existingRequest) return undefined;
+    
+    const updatedRequest = { ...existingRequest, status };
+    this.rentalRequests.set(id, updatedRequest);
+    
+    // Log the activity
+    await this.createActivityLog({
+      activityType: "REQUEST_UPDATED",
+      description: `更新租借申請狀態: ${id} 至 ${status}`,
+      relatedId: id
+    });
+    
+    return updatedRequest;
+  }
+  
+  // Parking Offer methods (for simplified parking system)
+  async getParkingOffersByRequestId(requestId: number): Promise<ParkingOffer[]> {
+    return Array.from(this.parkingOffers.values()).filter(
+      (offer) => offer.requestId === requestId
+    );
+  }
+  
+  async createParkingOffer(offer: InsertParkingOffer): Promise<ParkingOffer> {
+    const id = this.parkingOfferCurrentId++;
+    const newOffer: ParkingOffer = {
+      ...offer,
+      id,
+      createdAt: new Date()
+    };
+    this.parkingOffers.set(id, newOffer);
+    
+    // Update the rental request status to matched
+    const request = await this.getRentalRequestById(offer.requestId);
+    if (request) {
+      await this.updateRentalRequestStatus(request.id, REQUEST_STATUS.MATCHED);
+    }
+    
+    // Log the activity
+    await this.createActivityLog({
+      activityType: "OFFER_CREATED",
+      description: `車位提供: ${offer.ownerName} 提供車位 ${offer.spaceNumber} 給請求 ${offer.requestId}`,
+      relatedId: id
+    });
+    
+    return newOffer;
+  }
 }
 
 export const storage = new MemStorage();
