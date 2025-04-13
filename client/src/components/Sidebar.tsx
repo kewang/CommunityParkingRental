@@ -35,18 +35,17 @@ const Sidebar = ({ activePath }: SidebarProps) => {
         <ul className="space-y-2">
           {navItems.map((item) => (
             <li key={item.path}>
-              <Link href={item.path}>
-                <a
-                  className={`flex items-center p-3 rounded-md transition-colors ${
-                    isActive(item.path)
-                      ? "text-primary bg-[#F3F2F1]"
-                      : "hover:bg-[#F3F2F1]"
-                  }`}
-                >
-                  <span className="w-6">{item.icon}</span>
-                  <span>{item.label}</span>
-                </a>
-              </Link>
+              <div
+                onClick={() => window.location.href = item.path}
+                className={`flex items-center p-3 rounded-md transition-colors cursor-pointer ${
+                  isActive(item.path)
+                    ? "text-primary bg-[#F3F2F1]"
+                    : "hover:bg-[#F3F2F1]"
+                }`}
+              >
+                <span className="w-6">{item.icon}</span>
+                <span>{item.label}</span>
+              </div>
             </li>
           ))}
         </ul>
