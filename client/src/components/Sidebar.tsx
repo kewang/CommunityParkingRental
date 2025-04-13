@@ -25,13 +25,8 @@ const Sidebar = ({ activePath }: SidebarProps) => {
   
   // Navigation items
   const navItems = [
-    { path: '/', icon: <LayoutDashboard className="w-5 h-5" />, label: t('dashboard') },
-    { path: '/parking-spaces', icon: <Car className="w-5 h-5" />, label: t('parkingSpaces') },
-    { path: '/rentals', icon: <Repeat className="w-5 h-5" />, label: t('rentals') },
-    { path: '/households', icon: <Home className="w-5 h-5" />, label: t('households') },
     { path: '/create-rental', icon: <Car className="w-5 h-5" />, label: '申請租車位' },
-    { path: '/reports', icon: <BarChart4 className="w-5 h-5" />, label: t('reports') },
-    { path: '/settings', icon: <Settings className="w-5 h-5" />, label: t('settings') }
+    { path: '/rentals', icon: <Repeat className="w-5 h-5" />, label: '租借記錄' },
   ];
   
   return (

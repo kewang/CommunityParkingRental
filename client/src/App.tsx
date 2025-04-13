@@ -15,11 +15,9 @@ import { useState } from "react";
 function Router() {
   return (
     <Switch>
-      <Route path="/" component={Dashboard} />
-      <Route path="/parking-spaces" component={ParkingSpaces} />
-      <Route path="/rentals" component={Rentals} />
-      <Route path="/households" component={Households} />
+      <Route path="/" component={CreateRental} />
       <Route path="/create-rental" component={CreateRental} />
+      <Route path="/rentals" component={Rentals} />
       <Route path="/offer-parking/:requestId" component={OfferParking} />
       <Route component={NotFound} />
     </Switch>

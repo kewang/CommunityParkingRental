@@ -131,53 +131,75 @@ const CreateRental = () => {
       <h1 className="text-2xl font-bold text-center mb-6">車位租借申請</h1>
       
       {generatedLink ? (
-        <Card>
+        <Card className="shadow-lg border-t-4 border-primary">
           <CardHeader>
-            <CardTitle>申請成功</CardTitle>
-            <CardDescription>
+            <CardTitle className="text-center">申請成功</CardTitle>
+            <CardDescription className="text-center">
               請將此連結分享給車位擁有者
             </CardDescription>
           </CardHeader>
           <CardContent>
-            <div className="p-3 bg-gray-100 rounded-md flex items-center justify-between">
+            <div className="p-4 bg-gray-50 rounded-md flex items-center justify-between mb-4 border">
               <div className="text-sm overflow-hidden overflow-ellipsis">
                 {generatedLink}
               </div>
-              <div className="flex gap-2">
-                <Button variant="ghost" size="icon" onClick={copyToClipboard}>
+              <div className="flex gap-2 ml-2 flex-shrink-0">
+                <Button variant="outline" size="icon" onClick={copyToClipboard} title="複製連結">
                   <Copy className="h-4 w-4" />
                 </Button>
-                <Button variant="ghost" size="icon" onClick={shareLink}>
+                <Button variant="outline" size="icon" onClick={shareLink} title="分享連結">
                   <Share2 className="h-4 w-4" />
                 </Button>
               </div>
             </div>
             
-            <Alert className="mt-4">
-              <AlertTitle>說明</AlertTitle>
+            <Alert className="mb-4">
+              <AlertTitle className="text-primary">如何使用</AlertTitle>
               <AlertDescription>
-                車位擁有者點擊此連結後，可以提供車位租借給您
+                將此連結發送給擁有車位的人，他們點擊後可以提供車位租借給您
               </AlertDescription>
             </Alert>
+
+            <div className="rounded-md bg-gray-50 p-4 border">
+              <h3 className="font-medium text-sm text-gray-500 mb-2">您的租借資訊</h3>
+              <div className="grid grid-cols-2 gap-2 text-sm">
+                <div>
+                  <span className="text-gray-500">姓名：</span>
+                  <p className="font-medium">{form.getValues("name")}</p>
+                </div>
+                <div>
+                  <span className="text-gray-500">車牌號碼：</span>
+                  <p className="font-medium">{form.getValues("licensePlate")}</p>
+                </div>
+                <div>
+                  <span className="text-gray-500">起始日期：</span>
+                  <p className="font-medium">{format(form.getValues("startDate"), "yyyy/MM/dd")}</p>
+                </div>
+                <div>
+                  <span className="text-gray-500">結束日期：</span>
+                  <p className="font-medium">{format(form.getValues("endDate"), "yyyy/MM/dd")}</p>
+                </div>
+              </div>
+            </div>
           </CardContent>
           <CardFooter>
             <Button 
-              className="w-full" 
+              className="w-full"
               onClick={() => {
                 setGeneratedLink(null);
                 form.reset();
               }}
             >
-              創建新申請
+              建立新租借申請
             </Button>
           </CardFooter>
         </Card>
       ) : (
-        <Card>
+        <Card className="shadow-lg">
           <CardHeader>
-            <CardTitle>租借資訊</CardTitle>
-            <CardDescription>
-              提供您的資訊以尋找可用車位
+            <CardTitle className="text-center">尋找車位</CardTitle>
+            <CardDescription className="text-center">
+              填寫您的資料以尋找可用的停車位
             </CardDescription>
           </CardHeader>
           <CardContent>

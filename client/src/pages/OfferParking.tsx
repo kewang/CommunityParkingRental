@@ -194,83 +194,101 @@ const OfferParking = () => {
       <h1 className="text-2xl font-bold text-center mb-6">提供車位出租</h1>
       
       {isSubmitted && requestData ? (
-        <Card>
-          <CardHeader>
+        <Card className="shadow-lg border-t-4 border-green-500">
+          <CardHeader className="text-center">
+            <div className="flex justify-center mb-4">
+              <CheckCircle2 className="text-green-500 h-16 w-16" />
+            </div>
             <CardTitle>確認成功</CardTitle>
             <CardDescription>
               您已成功提供車位租借
             </CardDescription>
           </CardHeader>
-          <CardContent className="text-center">
-            <div className="flex justify-center mb-4">
-              <CheckCircle2 className="text-green-500 h-16 w-16" />
-            </div>
-            <h3 className="text-lg font-semibold mb-2">租借資訊已確認</h3>
-            <p className="text-sm text-gray-500 mb-4">
-              車位租借詳情已發送給雙方，請保持聯絡暢通
-            </p>
+          <CardContent>
+            <Alert className="mb-4 bg-green-50 border-green-100">
+              <AlertTitle className="text-green-700">租借資訊已確認</AlertTitle>
+              <AlertDescription className="text-green-600">
+                車位租借詳情已發送給雙方，請保持聯絡暢通
+              </AlertDescription>
+            </Alert>
             
-            <div className="border rounded-md p-4 bg-gray-50 mt-4 text-left">
-              <div className="flex items-center gap-2 mb-2">
-                <Car className="h-4 w-4 text-gray-500" />
-                <span className="text-sm font-medium">車位編號: {form.getValues("spaceNumber")}</span>
-              </div>
-              <div className="flex items-center gap-2 mb-2">
-                <Calendar className="h-4 w-4 text-gray-500" />
-                <span className="text-sm">
-                  租借期間: {formatDate(requestData.startDate)} - {formatDate(requestData.endDate)}
-                </span>
-              </div>
-              <div className="flex items-center gap-2">
-                <User className="h-4 w-4 text-gray-500" />
-                <span className="text-sm">租借者: {requestData.name}</span>
+            <div className="border rounded-md p-4 bg-gray-50">
+              <h3 className="font-medium mb-3 text-gray-700">租借資訊</h3>
+              <div className="space-y-3">
+                <div className="flex items-center gap-2">
+                  <Car className="h-4 w-4 text-primary" />
+                  <span className="text-sm font-medium">車位編號: {form.getValues("spaceNumber")}</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <User className="h-4 w-4 text-primary" />
+                  <span className="text-sm">車位提供者: {form.getValues("ownerName")}</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <Calendar className="h-4 w-4 text-primary" />
+                  <span className="text-sm">
+                    租借期間: {formatDate(requestData.startDate)} - {formatDate(requestData.endDate)}
+                  </span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <User className="h-4 w-4 text-primary" />
+                  <span className="text-sm">租借者: {requestData.name}</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <Car className="h-4 w-4 text-primary" />
+                  <span className="text-sm">車牌號碼: {requestData.licensePlate}</span>
+                </div>
               </div>
             </div>
           </CardContent>
           <CardFooter>
             <Button 
               className="w-full" 
-              onClick={() => window.location.href = "/"}
+              onClick={() => window.location.href = "/create-rental"}
             >
               返回首頁
             </Button>
           </CardFooter>
         </Card>
       ) : requestData ? (
-        <Card>
+        <Card className="shadow-lg">
           <CardHeader>
-            <CardTitle>租借詳情</CardTitle>
-            <CardDescription>
-              此用戶正在尋找可用車位
+            <CardTitle className="text-center">租借請求</CardTitle>
+            <CardDescription className="text-center">
+              以下用戶正在尋找可用車位，請填寫您的資料
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
             <div className="border rounded-md p-4 bg-gray-50">
-              <h3 className="font-medium mb-2">租借需求</h3>
-              <div className="grid grid-cols-2 gap-2 text-sm">
-                <div>
-                  <span className="text-gray-500">租借者:</span>
-                  <p>{requestData.name}</p>
-                </div>
-                <div>
-                  <span className="text-gray-500">車牌號碼:</span>
-                  <p>{requestData.licensePlate}</p>
-                </div>
-                <div>
-                  <span className="text-gray-500">起始日期:</span>
-                  <p>{formatDate(requestData.startDate)}</p>
-                </div>
-                <div>
-                  <span className="text-gray-500">結束日期:</span>
-                  <p>{formatDate(requestData.endDate)}</p>
-                </div>
-                {requestData.notes && (
-                  <div className="col-span-2">
-                    <span className="text-gray-500">備註:</span>
-                    <p>{requestData.notes}</p>
+              <h3 className="font-medium mb-2 text-gray-700">租借需求</h3>
+              <div className="space-y-2 mb-3">
+                <div className="flex items-center gap-2">
+                  <User className="h-4 w-4 text-primary" />
+                  <div>
+                    <span className="text-gray-500 text-xs">租借者：</span>
+                    <span className="font-medium text-sm">{requestData.name}</span>
                   </div>
-                )}
+                </div>
+                <div className="flex items-center gap-2">
+                  <Car className="h-4 w-4 text-primary" />
+                  <div>
+                    <span className="text-gray-500 text-xs">車牌號碼：</span>
+                    <span className="font-medium text-sm">{requestData.licensePlate}</span>
+                  </div>
+                </div>
+                <div className="flex items-center gap-2">
+                  <Calendar className="h-4 w-4 text-primary" />
+                  <div>
+                    <span className="text-gray-500 text-xs">租借期間：</span>
+                    <span className="font-medium text-sm">{formatDate(requestData.startDate)} - {formatDate(requestData.endDate)}</span>
+                  </div>
+                </div>
               </div>
+              {requestData.notes && (
+                <div className="pt-2 border-t">
+                  <span className="text-gray-500 text-xs block">備註：</span>
+                  <p className="text-sm mt-1">{requestData.notes}</p>
+                </div>
+              )}
             </div>
 
             <Form {...form}>
