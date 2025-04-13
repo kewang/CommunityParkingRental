@@ -159,8 +159,8 @@ export const rentalRequestFormSchema = z.object({
   name: z.string().min(1, "請輸入姓名"),
   contact: z.string().min(1, "請輸入聯絡方式"),
   licensePlate: z.string().min(1, "請輸入車牌號碼"),
-  startDate: z.date().min(new Date(new Date().setHours(0, 0, 0, 0)), "開始日期不能早於今天"),
-  endDate: z.date(),
+  startDate: z.coerce.date().min(new Date(new Date().setHours(0, 0, 0, 0)), "開始日期不能早於今天"),
+  endDate: z.coerce.date(),
   notes: z.string().optional(),
 }).refine((data) => data.endDate > data.startDate, {
   message: "結束日期必須在開始日期之後",
