@@ -111,16 +111,7 @@ const OfferParking = () => {
 
   // 格式化日期
   const formatDate = (dateString: string) => {
-    try {
-      // 檢查是否為有效日期
-      if (!dateString || isNaN(Date.parse(dateString))) {
-        return "日期無效";
-      }
-      return format(new Date(dateString), "yyyy/MM/dd");
-    } catch (error) {
-      console.error("Date formatting error:", error);
-      return "日期無效";
-    }
+    return format(new Date(dateString), "yyyy/MM/dd");
   };
 
   // 如果沒有找到有效的請求ID
