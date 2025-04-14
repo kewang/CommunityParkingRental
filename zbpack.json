@@ -1,3 +1,0 @@
-{
-    "start_command": "NODE_ENV=production node index.js"
-}
