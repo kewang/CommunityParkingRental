@@ -111,7 +111,14 @@ const OfferParking = () => {
 
   // 格式化日期
   const formatDate = (dateString: string) => {
-    return format(new Date(dateString), "yyyy/MM/dd");
+    try {
+      // 移除時間部分，只保留日期
+      const datePart = dateString.split('T')[0];
+      return format(new Date(datePart), "yyyy/MM/dd");
+    } catch (error) {
+      console.error("日期格式化錯誤:", error);
+      return dateString; // 返回原始字符串，以防萬一
+    }
   };
 
   // 如果沒有找到有效的請求ID

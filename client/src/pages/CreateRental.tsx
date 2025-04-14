@@ -98,7 +98,14 @@ const CreateRental = () => {
 
   // 表單提交處理
   const onSubmit = (values: RentalRequestValues) => {
-    mutation.mutate(values);
+    // 確保只發送日期部分，不包含時間
+    const processedValues = {
+      ...values,
+      startDate: values.startDate ? new Date(values.startDate.toISOString().split('T')[0]) : values.startDate,
+      endDate: values.endDate ? new Date(values.endDate.toISOString().split('T')[0]) : values.endDate
+    };
+    
+    mutation.mutate(processedValues);
   };
 
   // 複製連結到剪貼簿
