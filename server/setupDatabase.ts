@@ -1,6 +1,7 @@
 import pg from 'pg';
 const { Pool } = pg;
 import fs from 'fs';
+import { fileURLToPath } from 'url';
 import path from 'path';
 
 /**
@@ -61,21 +62,10 @@ export async function setupDatabase() {
     if (missingTables.length > 0) {
       console.log(`需要創建以下表: ${missingTables.join(', ')}`);
       
-      // 讀取 SQL 創建表腳本
-      const sqlPath = path.join(__dirname, '../create_tables.sql');
-      if (fs.existsSync(sqlPath)) {
-        const sqlScript = fs.readFileSync(sqlPath, 'utf8');
-        
-        // 執行 SQL 腳本
-        await pool.query(sqlScript);
-        console.log("成功創建所有缺少的表!");
-      } else {
-        console.error("找不到 SQL 腳本檔案，無法自動創建表");
-        // 沒有找到 SQL 腳本文件時，手動創建表
-        const createTableSQL = generateCreateTableSQL();
-        await pool.query(createTableSQL);
-        console.log("通過生成的 SQL 成功創建所有缺少的表!");
-      }
+      // 直接使用內嵌的 SQL 來創建表
+      const createTableSQL = generateCreateTableSQL();
+      await pool.query(createTableSQL);
+      console.log("通過生成的 SQL 成功創建所有缺少的表!");
     } else {
       console.log("所有必需的表都已存在，無需創建");
     }
