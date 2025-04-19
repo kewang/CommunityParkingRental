@@ -55,7 +55,8 @@ const OfferParking = () => {
   const [match, params] = useRoute<{ requestId: string }>("/offer-parking/:requestId");
   const requestId = match ? params.requestId : null;
 
-  // 獲取租借請求資訊 - API 返回的是陣列
+  // 使用API端點獲取所有租借請求，然後在前端過濾
+  // 看來服務端未正確實現針對單個ID的過濾，始終返回數組
   const { data: requestsData, isLoading, error } = useQuery<RentalRequest[]>({
     queryKey: ['/api/rental-requests'],
     enabled: !!requestId
@@ -227,7 +228,7 @@ const OfferParking = () => {
   }
   
   // 如果數據已加載但未找到對應 ID 的租借請求
-  if (!isLoading && requestsData && !requestData) {
+  if (!isLoading && !error && requestsData && !requestData) {
     return (
       <div className="container max-w-md mx-auto py-10">
         <Card>
