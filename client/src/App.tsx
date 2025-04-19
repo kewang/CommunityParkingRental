@@ -5,7 +5,7 @@ import { Toaster } from "@/components/ui/toaster";
 import NotFound from "@/pages/not-found";
 import Dashboard from "@/pages/Dashboard";
 import ParkingSpaces from "@/pages/ParkingSpaces";
-import Rentals from "@/pages/Rentals";
+import PendingRequests from "@/pages/PendingRequests";
 import Households from "@/pages/Households";
 import CreateRental from "@/pages/CreateRental";
 import OfferParking from "@/pages/OfferParking";
@@ -17,7 +17,7 @@ function Router() {
     <Switch>
       <Route path="/" component={CreateRental} />
       <Route path="/create-rental" component={CreateRental} />
-      <Route path="/rentals" component={Rentals} />
+      <Route path="/pending-requests" component={PendingRequests} />
       <Route path="/offer-parking/:requestId" component={OfferParking} />
       <Route component={NotFound} />
     </Switch>

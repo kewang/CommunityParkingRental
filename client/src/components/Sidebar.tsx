@@ -6,7 +6,7 @@ import {
   Home,
   BarChart4,
   Settings,
-  Repeat
+  ClipboardList
 } from "lucide-react";
 
 interface SidebarProps {
@@ -26,7 +26,7 @@ const Sidebar = ({ activePath }: SidebarProps) => {
   // Navigation items
   const navItems = [
     { path: '/create-rental', icon: <Car className="w-5 h-5" />, label: '申請租車位' },
-    { path: '/rentals', icon: <Repeat className="w-5 h-5" />, label: '租借記錄' },
+    { path: '/pending-requests', icon: <ClipboardList className="w-5 h-5" />, label: '目前待租借' },
   ];
   
   return (
