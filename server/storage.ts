@@ -12,8 +12,15 @@ import {
   InsertRentalRequest,
   ParkingOffer,
   InsertParkingOffer,
-  REQUEST_STATUS
+  REQUEST_STATUS,
+  parkingSpaces,
+  households,
+  rentals,
+  activityLogs,
+  rentalRequests,
+  parkingOffers
 } from "@shared/schema";
+import { eq, and, desc, asc, gte, lte, count, sql } from "drizzle-orm";
 
 export interface IStorage {
   // Parking Space methods
@@ -981,4 +988,6 @@ export class DatabaseStorage implements IStorage {
   }
 }
 
-export const storage = new DatabaseStorage();
+// 依據環境決定使用哪種存儲方式
+// 如果數據庫連接失敗，將回退到內存存儲
+export const storage = process.env.DATABASE_URL ? new DatabaseStorage() : new MemStorage();

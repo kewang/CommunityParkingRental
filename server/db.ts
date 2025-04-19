@@ -1,35 +1,53 @@
-import { Pool, neonConfig } from '@neondatabase/serverless';
-import { drizzle } from 'drizzle-orm/neon-serverless';
-import ws from "ws";
+import { Pool } from 'pg';
+import { drizzle } from 'drizzle-orm/node-postgres';
 import * as schema from "@shared/schema";
-
-// 設置 Neon 配置，這對於在 Node.js 環境中使用 Neon Serverless 是必要的
-neonConfig.webSocketConstructor = ws;
-neonConfig.useSecureWebSocket = false; // 對於 Replit，有時需要禁用安全 WebSocket
-neonConfig.pipelineTLS = false; // 禁用 TLS 管道
 
 // 確保數據庫 URL 存在
 if (!process.env.DATABASE_URL) {
-  throw new Error(
-    "DATABASE_URL must be set. Did you forget to provision a database?",
-  );
+  console.warn("DATABASE_URL not set. Using in-memory storage instead of PostgreSQL.");
 }
 
-// 初始化數據庫連接池
-console.log("Initializing database connection...");
-export const pool = new Pool({
-  connectionString: process.env.DATABASE_URL,
-  // 連接參數，優化連接管理
-  max: 10, // 連接池中的最大連接數
-  idleTimeoutMillis: 30000, // 連接可以空閒的最長時間
-  connectionTimeoutMillis: 10000, // 連接超時時間
-});
+// 建立連接池
+let pool: Pool | null = null;
+let db: any = null;
 
-// 初始化 Drizzle ORM 實例
-export const db = drizzle(pool, { schema });
+// 初始化數據庫 (只在有 DATABASE_URL 時)
+if (process.env.DATABASE_URL) {
+  try {
+    console.log("Initializing database connection...");
+    
+    // 處理 Heroku 的 SSL 要求
+    const config: any = {
+      connectionString: process.env.DATABASE_URL,
+      max: 10,
+      idleTimeoutMillis: 30000,
+      connectionTimeoutMillis: 10000
+    };
+    
+    // 如果是生產環境（通常是 Heroku），需要啟用 SSL
+    if (process.env.NODE_ENV === 'production') {
+      config.ssl = {
+        rejectUnauthorized: false // Heroku 需要此設置
+      };
+    }
+    
+    pool = new Pool(config);
+    db = drizzle(pool, { schema });
+    
+    // 測試連接
+    testConnection();
+  } catch (error) {
+    console.error("Failed to initialize database connection:", error);
+  }
+}
 
-// 導出測試連接的功能
+// 測試連接功能
 export async function testConnection() {
+  if (!pool) {
+    console.warn("No database pool available.");
+    return false;
+  }
+  
   try {
     const result = await pool.query('SELECT 1 as test');
     console.log("Database connection successful:", result.rows[0]);
@@ -40,11 +58,5 @@ export async function testConnection() {
   }
 }
 
-// 測試連接
-testConnection().then(connected => {
-  if (connected) {
-    console.log("Database is ready to use!");
-  } else {
-    console.log("Database connection failed. Check your configuration.");
-  }
-});
+// 導出連接池和 ORM 實例
+export { pool, db };
