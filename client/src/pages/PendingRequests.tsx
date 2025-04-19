@@ -52,7 +52,7 @@ const PendingRequests = () => {
     }
   };
   
-  // 複製租借鏈接
+  // 複製租借連結
   const copyRentalLink = (requestId: number) => {
     const baseUrl = window.location.origin;
     const shareLink = `${baseUrl}/offer-parking/${requestId}`;
@@ -60,7 +60,7 @@ const PendingRequests = () => {
     navigator.clipboard.writeText(shareLink);
     toast({
       title: "已複製",
-      description: "租借鏈接已複製到剪貼簿",
+      description: "租借連結已複製到剪貼簿",
     });
   };
   
@@ -212,7 +212,7 @@ const PendingRequests = () => {
                   className="w-full"
                   onClick={() => copyRentalLink(request.id)}
                 >
-                  複製租借鏈接
+                  複製租借連結
                 </Button>
               </CardFooter>
             </Card>
