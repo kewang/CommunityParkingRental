@@ -11,7 +11,6 @@ import CreateRental from "@/pages/CreateRental";
 import OfferParking from "@/pages/OfferParking";
 import Layout from "@/components/Layout";
 import { useState } from "react";
-import { HelmetProvider } from 'react-helmet-async';
 
 function Router() {
   return (
@@ -29,14 +28,12 @@ function App() {
   const [lang, setLang] = useState<'zh' | 'en'>('zh');
   
   return (
-    <HelmetProvider>
-      <QueryClientProvider client={queryClient}>
-        <Layout lang={lang} setLang={setLang}>
-          <Router />
-        </Layout>
-        <Toaster />
-      </QueryClientProvider>
-    </HelmetProvider>
+    <QueryClientProvider client={queryClient}>
+      <Layout lang={lang} setLang={setLang}>
+        <Router />
+      </Layout>
+      <Toaster />
+    </QueryClientProvider>
   );
 }
 
