@@ -33,9 +33,6 @@ const Header = ({ lang, setLang }: HeaderProps) => {
           </svg>
           <h1 className="text-xl font-bold text-primary">
             <span className="mr-2">{t("systemTitle")}</span>
-            <span className="text-sm font-english text-[#605E5C]">
-              {lang === "zh" ? "Community Parking Management" : "社區停車場管理系統"}
-            </span>
           </h1>
         </div>
         
