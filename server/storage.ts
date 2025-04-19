@@ -981,5 +981,4 @@ export class DatabaseStorage implements IStorage {
   }
 }
 
-// 暫時使用內存存儲，直到我們解決數據庫連接問題
-export const storage = new MemStorage();
+export const storage = new DatabaseStorage();
