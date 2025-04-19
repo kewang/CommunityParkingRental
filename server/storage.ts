@@ -698,19 +698,22 @@ export class DatabaseStorage implements IStorage {
   // Rental methods
   async getAllRentals(): Promise<Rental[]> {
     const { db } = await import('./db');
-    return await db.select().from(schema.rentals);
+    const { rentals } = await import('@shared/schema');
+    return await db.select().from(rentals);
   }
 
   async getActiveRentals(): Promise<Rental[]> {
     const { db } = await import('./db');
+    const { rentals } = await import('@shared/schema');
     const { eq } = await import('drizzle-orm');
-    return await db.select().from(schema.rentals).where(eq(schema.rentals.isActive, true));
+    return await db.select().from(rentals).where(eq(rentals.isActive, true));
   }
 
   async getRentalById(id: number): Promise<Rental | undefined> {
     const { db } = await import('./db');
+    const { rentals } = await import('@shared/schema');
     const { eq } = await import('drizzle-orm');
-    const [rental] = await db.select().from(schema.rentals).where(eq(schema.rentals.id, id));
+    const [rental] = await db.select().from(rentals).where(eq(rentals.id, id));
     return rental;
   }
 
