@@ -485,20 +485,6 @@ const OfferParking = () => {
                 </Button>
               </form>
             </Form>
-            
-            {/* 社區公告 */}
-            <div className="border rounded-md p-4 bg-gray-50 mt-6">
-              <h3 className="font-medium mb-3 text-gray-700">社區公告</h3>
-              <div className="text-xs text-gray-600">
-                <div className="font-medium mb-2">2025/3/17 公告</div>
-                <ol className="list-decimal pl-5 space-y-2">
-                  <li>近日住戶間分享個人汽車位供其他住戶使用，造成大門保全無法確定及發生多起誤停放到其他住戶車位情事發生。</li>
-                  <li>為有效管制汽車登記，避免依意違規停放住戶車位。</li>
-                  <li>一再發生違停他人車位情事，故於3月17日起，懇請預短期借用您的車位供給芳鄰停放者，商請住戶配合，先致電至服務中心登記後 (02-24695856)，通報大門憑證放行。</li>
-                  <li>為社區停車管制安全，未經通報提供車位之住戶，大門將依臨停登記辦理，造成不便懇請見諒！</li>
-                </ol>
-              </div>
-            </div>
           </CardContent>
         </Card>
       ) : null}
