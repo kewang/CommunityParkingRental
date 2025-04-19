@@ -23,6 +23,65 @@
     
     <!-- 主題顏色 -->
     <meta name="theme-color" content="#0070f3" />
+    
+    <!-- 動態 Meta 標籤處理 -->
+    <script type="text/javascript">
+      (function() {
+        // 檢查當前 URL 是否是租借頁面
+        const path = window.location.pathname;
+        const offerMatch = path.match(/^\/offer-parking\/(\d+)/);
+        
+        if (offerMatch) {
+          const requestId = offerMatch[1];
+          // 異步獲取租借請求數據
+          fetch(`/api/rental-requests/${requestId}`)
+            .then(response => {
+              if (response.ok) return response.json();
+              throw new Error('無法獲取租借請求數據');
+            })
+            .then(data => {
+              if (data) {
+                // 格式化日期
+                const formatDate = (dateStr) => {
+                  const date = new Date(dateStr);
+                  return date.toLocaleDateString('zh-TW', { year: 'numeric', month: '2-digit', day: '2-digit' });
+                };
+                
+                const startDate = formatDate(data.startDate);
+                const endDate = formatDate(data.endDate);
+                
+                // 更新頁面標題
+                document.title = `提供停車位給 ${data.name} | 台北雪黎灣停車位短租系統`;
+                
+                // 更新 meta description
+                const descriptionMeta = document.querySelector('meta[name="description"]');
+                if (descriptionMeta) {
+                  descriptionMeta.setAttribute('content', 
+                    `${data.name} 正在尋找停車位從 ${startDate} 到 ${endDate}，車牌號碼 ${data.licensePlate}。請確認是否能提供您的車位。`);
+                }
+                
+                // 更新 Open Graph 標籤
+                const ogTitle = document.querySelector('meta[property="og:title"]');
+                const ogDesc = document.querySelector('meta[property="og:description"]');
+                const twitterTitle = document.querySelector('meta[property="twitter:title"]');
+                const twitterDesc = document.querySelector('meta[property="twitter:description"]');
+                
+                if (ogTitle) ogTitle.setAttribute('content', `提供停車位給 ${data.name} | 台北雪黎灣停車位短租系統`);
+                if (ogDesc) ogDesc.setAttribute('content', 
+                  `${data.name} 正在尋找停車位從 ${startDate} 到 ${endDate}，車牌號碼 ${data.licensePlate}。請確認是否能提供您的車位。`);
+                if (twitterTitle) twitterTitle.setAttribute('content', `提供停車位給 ${data.name} | 台北雪黎灣停車位短租系統`);
+                if (twitterDesc) twitterDesc.setAttribute('content', 
+                  `${data.name} 正在尋找停車位從 ${startDate} 到 ${endDate}，車牌號碼 ${data.licensePlate}。請確認是否能提供您的車位。`);
+                
+                console.log('已更新租借相關的 Open Graph 標籤', data);
+              }
+            })
+            .catch(error => {
+              console.error('更新 Open Graph 標籤時出錯:', error);
+            });
+        }
+      })();
+    </script>
   </head>
   <body>
     <div id="root"></div>
