@@ -719,28 +719,31 @@ export class DatabaseStorage implements IStorage {
 
   async getRentalsByParkingSpaceId(parkingSpaceId: number): Promise<Rental[]> {
     const { db } = await import('./db');
+    const { rentals } = await import('@shared/schema');
     const { eq } = await import('drizzle-orm');
-    return await db.select().from(schema.rentals).where(eq(schema.rentals.parkingSpaceId, parkingSpaceId));
+    return await db.select().from(rentals).where(eq(rentals.parkingSpaceId, parkingSpaceId));
   }
 
   async getRentalsByHouseholdId(householdId: number): Promise<Rental[]> {
     const { db } = await import('./db');
+    const { rentals } = await import('@shared/schema');
     const { eq } = await import('drizzle-orm');
-    return await db.select().from(schema.rentals).where(eq(schema.rentals.householdId, householdId));
+    return await db.select().from(rentals).where(eq(rentals.householdId, householdId));
   }
 
   async createRental(rental: InsertRental): Promise<Rental> {
     const { db } = await import('./db');
+    const { rentals, parkingSpaces, SPACE_STATUS } = await import('@shared/schema');
     const { eq } = await import('drizzle-orm');
     
     // 事務方法確保所有操作要麼一起成功，要麼一起失敗
     async function transaction() {
-      const [newRental] = await db.insert(schema.rentals).values(rental).returning();
+      const [newRental] = await db.insert(rentals).values(rental).returning();
       
       // 更新車位狀態為已佔用
-      await db.update(schema.parkingSpaces)
+      await db.update(parkingSpaces)
         .set({ status: SPACE_STATUS.OCCUPIED })
-        .where(eq(schema.parkingSpaces.id, rental.parkingSpaceId));
+        .where(eq(parkingSpaces.id, rental.parkingSpaceId));
       
       return newRental;
     }
@@ -766,10 +769,11 @@ export class DatabaseStorage implements IStorage {
 
   async updateRental(id: number, rentalUpdate: Partial<InsertRental>): Promise<Rental | undefined> {
     const { db } = await import('./db');
+    const { rentals } = await import('@shared/schema');
     const { eq } = await import('drizzle-orm');
-    const [updatedRental] = await db.update(schema.rentals)
+    const [updatedRental] = await db.update(rentals)
       .set(rentalUpdate)
-      .where(eq(schema.rentals.id, id))
+      .where(eq(rentals.id, id))
       .returning();
     
     if (updatedRental) {
@@ -786,23 +790,24 @@ export class DatabaseStorage implements IStorage {
 
   async endRental(id: number): Promise<boolean> {
     const { db } = await import('./db');
+    const { rentals, parkingSpaces, SPACE_STATUS } = await import('@shared/schema');
     const { eq } = await import('drizzle-orm');
     
     // 先獲取租賃信息
-    const [rental] = await db.select().from(schema.rentals).where(eq(schema.rentals.id, id));
+    const [rental] = await db.select().from(rentals).where(eq(rentals.id, id));
     if (!rental || !rental.isActive) return false;
     
     // 事務方法確保所有操作要麼一起成功，要麼一起失敗
     async function transaction() {
       // 更新租賃為非活動狀態
-      const result = await db.update(schema.rentals)
+      const result = await db.update(rentals)
         .set({ isActive: false })
-        .where(eq(schema.rentals.id, id));
+        .where(eq(rentals.id, id));
       
       // 更新車位為可用狀態
-      await db.update(schema.parkingSpaces)
+      await db.update(parkingSpaces)
         .set({ status: SPACE_STATUS.AVAILABLE })
-        .where(eq(schema.parkingSpaces.id, rental.parkingSpaceId));
+        .where(eq(parkingSpaces.id, rental.parkingSpaceId));
       
       return result.count > 0;
     }
@@ -827,8 +832,9 @@ export class DatabaseStorage implements IStorage {
   // Activity logs
   async getAllActivityLogs(limit?: number): Promise<ActivityLog[]> {
     const { db } = await import('./db');
+    const { activityLogs } = await import('@shared/schema');
     const { desc } = await import('drizzle-orm');
-    const query = db.select().from(schema.activityLogs).orderBy(desc(schema.activityLogs.timestamp));
+    const query = db.select().from(activityLogs).orderBy(desc(activityLogs.timestamp));
     
     if (limit) {
       query.limit(limit);
@@ -851,25 +857,27 @@ export class DatabaseStorage implements IStorage {
   // Extended methods for specific business logic
   async getAvailableParkingSpaces(): Promise<ParkingSpace[]> {
     const { db } = await import('./db');
+    const { parkingSpaces, SPACE_STATUS } = await import('@shared/schema');
     const { eq } = await import('drizzle-orm');
-    return await db.select().from(schema.parkingSpaces)
-      .where(eq(schema.parkingSpaces.status, SPACE_STATUS.AVAILABLE));
+    return await db.select().from(parkingSpaces)
+      .where(eq(parkingSpaces.status, SPACE_STATUS.AVAILABLE));
   }
 
   async getExpiringRentals(daysThreshold: number): Promise<Rental[]> {
     const { db } = await import('./db');
+    const { rentals } = await import('@shared/schema');
     const { eq, and, lte, gte } = await import('drizzle-orm');
     
     const today = new Date();
     const thresholdDate = new Date();
     thresholdDate.setDate(today.getDate() + daysThreshold);
     
-    return await db.select().from(schema.rentals)
+    return await db.select().from(rentals)
       .where(
         and(
-          eq(schema.rentals.isActive, true),
-          lte(schema.rentals.endDate, thresholdDate),
-          gte(schema.rentals.endDate, today)
+          eq(rentals.isActive, true),
+          lte(rentals.endDate, thresholdDate),
+          gte(rentals.endDate, today)
         )
       );
   }
@@ -882,25 +890,26 @@ export class DatabaseStorage implements IStorage {
     activeRentalsCount: number;
   }> {
     const { db } = await import('./db');
+    const { parkingSpaces, rentals, SPACE_STATUS } = await import('@shared/schema');
     const { eq, count } = await import('drizzle-orm');
     
-    const [totalSpaces] = await db.select({ count: count() }).from(schema.parkingSpaces);
+    const [totalSpaces] = await db.select({ count: count() }).from(parkingSpaces);
     
     const [occupiedSpaces] = await db.select({ count: count() })
-      .from(schema.parkingSpaces)
-      .where(eq(schema.parkingSpaces.status, SPACE_STATUS.OCCUPIED));
+      .from(parkingSpaces)
+      .where(eq(parkingSpaces.status, SPACE_STATUS.OCCUPIED));
     
     const [availableSpaces] = await db.select({ count: count() })
-      .from(schema.parkingSpaces)
-      .where(eq(schema.parkingSpaces.status, SPACE_STATUS.AVAILABLE));
+      .from(parkingSpaces)
+      .where(eq(parkingSpaces.status, SPACE_STATUS.AVAILABLE));
     
     const [maintenanceSpaces] = await db.select({ count: count() })
-      .from(schema.parkingSpaces)
-      .where(eq(schema.parkingSpaces.status, SPACE_STATUS.MAINTENANCE));
+      .from(parkingSpaces)
+      .where(eq(parkingSpaces.status, SPACE_STATUS.MAINTENANCE));
     
     const [activeRentalsCount] = await db.select({ count: count() })
-      .from(schema.rentals)
-      .where(eq(schema.rentals.isActive, true));
+      .from(rentals)
+      .where(eq(rentals.isActive, true));
     
     return {
       totalSpaces: totalSpaces?.count || 0,
