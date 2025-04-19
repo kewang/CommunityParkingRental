@@ -1,6 +1,8 @@
 import { useTranslation } from "react-i18next";
 import { Button } from "@/components/ui/button";
 import { useEffect } from "react";
+import { useLocation } from "wouter";
+import MobileNav from "./MobileNav";
 
 interface HeaderProps {
   lang: "zh" | "en";
@@ -9,6 +11,7 @@ interface HeaderProps {
 
 const Header = ({ lang, setLang }: HeaderProps) => {
   const { t, i18n } = useTranslation();
+  const [location] = useLocation();
   
   // Toggle language
   const toggleLanguage = () => {
@@ -26,6 +29,11 @@ const Header = ({ lang, setLang }: HeaderProps) => {
     <header className="bg-white shadow-md">
       <div className="container mx-auto px-4 py-3 flex justify-between items-center">
         <div className="flex items-center">
+          {/* 移動設備菜單 */}
+          <div className="mr-2 md:hidden">
+            <MobileNav activePath={location} />
+          </div>
+          
           <svg className="w-8 h-8 text-primary mr-2" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
             <path d="M19 9.5H5C3.89543 9.5 3 10.3954 3 11.5V19.5C3 20.6046 3.89543 21.5 5 21.5H19C20.1046 21.5 21 20.6046 21 19.5V11.5C21 10.3954 20.1046 9.5 19 9.5Z" fill="currentColor"/>
             <path d="M7 9.5V5.5C7 4.17392 7.52678 2.90215 8.46447 1.96447C9.40215 1.02678 10.6739 0.5 12 0.5C13.3261 0.5 14.5979 1.02678 15.5355 1.96447C16.4732 2.90215 17 4.17392 17 5.5V9.5" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
