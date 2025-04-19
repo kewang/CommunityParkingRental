@@ -57,28 +57,47 @@ const OfferParking = () => {
   const requestId = match ? params.requestId : null;
 
   // 使用正確的API端點獲取特定ID的租借請求
-  const { data: requestData, isLoading, error } = useQuery<RentalRequest>({
+  const { data: requestData, isLoading: requestLoading, error: requestError } = useQuery<RentalRequest>({
     queryKey: [`/api/rental-requests/${requestId}`],
     enabled: !!requestId
   });
+  
+  // 獲取該租借請求的所有車位提供
+  const { data: offersData, isLoading: offersLoading } = useQuery<ParkingOfferResponse[]>({
+    queryKey: [`/api/rental-requests/${requestId}/offers`],
+    enabled: !!requestId
+  });
+
+  // 如果有現有提供，設置為已提交
+  useEffect(() => {
+    if (offersData && offersData.length > 0) {
+      setIsSubmitted(true);
+      // 將第一個提供的數據填入表單，以便在確認畫面顯示
+      const firstOffer = offersData[0];
+      form.setValue("spaceNumber", firstOffer.spaceNumber);
+      form.setValue("ownerName", firstOffer.ownerName);
+      form.setValue("ownerContact", firstOffer.ownerContact);
+      if (firstOffer.notes) {
+        form.setValue("notes", firstOffer.notes);
+      }
+    }
+  }, [offersData]);
   
   // 調試信息
   useEffect(() => {
     if (requestData) {
       console.log("租借請求數據:", requestData);
-      console.log("數據類型:", Array.isArray(requestData) ? "陣列" : typeof requestData);
-      if (Array.isArray(requestData)) {
-        console.log("陣列長度:", requestData.length);
-        console.log("第一個元素:", requestData[0]);
-      }
     }
-  }, [requestData]);
+    if (offersData) {
+      console.log("車位提供數據:", offersData);
+    }
+  }, [requestData, offersData]);
   
   useEffect(() => {
-    if (error) {
-      console.error("獲取租借請求失敗:", error);
+    if (requestError) {
+      console.error("獲取租借請求失敗:", requestError);
     }
-  }, [error]);
+  }, [requestError]);
 
   // 初始化表單
   const form = useForm<ParkingOfferValues>({
@@ -178,7 +197,7 @@ const OfferParking = () => {
   }
 
   // 正在讀取資料
-  if (isLoading) {
+  if (requestLoading || offersLoading) {
     return (
       <div className="container max-w-md mx-auto py-10">
         <Card>
@@ -198,7 +217,7 @@ const OfferParking = () => {
   }
 
   // 如果發生錯誤
-  if (error) {
+  if (requestError) {
     return (
       <div className="container max-w-md mx-auto py-10">
         <Card>
