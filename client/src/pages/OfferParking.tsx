@@ -252,16 +252,16 @@ const OfferParking = () => {
       {/* 動態 Meta 標籤 */}
       {requestData && (
         <Helmet>
-          <title>提供停車位給 {requestData.name} | 台北雪黎灣停車位短租系統</title>
+          <title>提供停車位給 {requestData.name} | 台北雪梨灣停車位短租系統</title>
           <meta name="description" content={`${requestData.name} 正在尋找停車位從 ${formatDate(requestData.startDate)} 到 ${formatDate(requestData.endDate)}，車牌號碼 ${requestData.licensePlate}。請確認是否能提供您的車位。`} />
           
           {/* Open Graph / Facebook */}
           <meta property="og:type" content="website" />
-          <meta property="og:title" content={`提供停車位給 ${requestData.name} | 台北雪黎灣停車位短租系統`} />
+          <meta property="og:title" content={`提供停車位給 ${requestData.name} | 台北雪梨灣停車位短租系統`} />
           <meta property="og:description" content={`${requestData.name} 正在尋找停車位從 ${formatDate(requestData.startDate)} 到 ${formatDate(requestData.endDate)}，車牌號碼 ${requestData.licensePlate}。請確認是否能提供您的車位。`} />
           
           {/* Twitter */}
-          <meta property="twitter:title" content={`提供停車位給 ${requestData.name} | 台北雪黎灣停車位短租系統`} />
+          <meta property="twitter:title" content={`提供停車位給 ${requestData.name} | 台北雪梨灣停車位短租系統`} />
           <meta property="twitter:description" content={`${requestData.name} 正在尋找停車位從 ${formatDate(requestData.startDate)} 到 ${formatDate(requestData.endDate)}，車牌號碼 ${requestData.licensePlate}。請確認是否能提供您的車位。`} />
         </Helmet>
       )}
