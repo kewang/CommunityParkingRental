@@ -98,14 +98,26 @@ const CreateRental = () => {
 
   // 表單提交處理
   const onSubmit = (values: RentalRequestValues) => {
-    // 確保只發送日期部分，不包含時間
-    const processedValues = {
-      ...values,
-      startDate: values.startDate ? new Date(values.startDate.toISOString().split('T')[0]) : values.startDate,
-      endDate: values.endDate ? new Date(values.endDate.toISOString().split('T')[0]) : values.endDate
-    };
-    
-    mutation.mutate(processedValues);
+    try {
+      console.log("原始表單數據:", values);
+      
+      // 為了 PostgreSQL 格式化日期為 YYYY-MM-DD 字符串格式
+      const processedValues = {
+        ...values,
+        startDate: values.startDate ? values.startDate.toISOString().split('T')[0] : values.startDate,
+        endDate: values.endDate ? values.endDate.toISOString().split('T')[0] : values.endDate
+      };
+      
+      console.log("處理後的數據:", processedValues);
+      mutation.mutate(processedValues as any);
+    } catch (error) {
+      console.error("日期處理錯誤:", error);
+      toast({
+        title: "錯誤",
+        description: "日期處理失敗，請重試",
+        variant: "destructive",
+      });
+    }
   };
 
   // 複製連結到剪貼簿
