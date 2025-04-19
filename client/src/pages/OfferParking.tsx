@@ -55,11 +55,14 @@ const OfferParking = () => {
   const [match, params] = useRoute<{ requestId: string }>("/offer-parking/:requestId");
   const requestId = match ? params.requestId : null;
 
-  // 獲取租借請求資訊
-  const { data: requestData, isLoading, error } = useQuery<RentalRequest>({
-    queryKey: ['/api/rental-requests', requestId],
+  // 獲取租借請求資訊 - API 返回的是陣列
+  const { data: requestsData, isLoading, error } = useQuery<RentalRequest[]>({
+    queryKey: ['/api/rental-requests'],
     enabled: !!requestId
   });
+  
+  // 找到與 requestId 匹配的請求
+  const requestData = requestsData?.find(req => req.id === Number(requestId));
   
   // 調試信息
   useEffect(() => {
@@ -212,6 +215,33 @@ const OfferParking = () => {
               <AlertTitle>載入失敗</AlertTitle>
               <AlertDescription>
                 無法讀取此租借請求的詳細資訊。請稍後再試或聯絡系統管理員。
+              </AlertDescription>
+            </Alert>
+            <Button className="w-full" onClick={() => window.location.href = "/"}>
+              返回首頁
+            </Button>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
+  
+  // 如果數據已加載但未找到對應 ID 的租借請求
+  if (!isLoading && requestsData && !requestData) {
+    return (
+      <div className="container max-w-md mx-auto py-10">
+        <Card>
+          <CardHeader>
+            <CardTitle>找不到租借請求</CardTitle>
+            <CardDescription>
+              此租借請求可能已過期或被刪除
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <Alert className="mb-4" variant="destructive">
+              <AlertTitle>無效的請求</AlertTitle>
+              <AlertDescription>
+                找不到 ID 為 {requestId} 的租借請求，請確認連結是否正確。
               </AlertDescription>
             </Alert>
             <Button className="w-full" onClick={() => window.location.href = "/"}>
