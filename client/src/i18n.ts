@@ -167,7 +167,7 @@ const zhResources = {
     warningTitle: "警告",
 
     // System messages
-    systemTitle: "台北雪黎灣停車位短租系統",
+    systemTitle: "台北雪梨灣停車位短租系統",
   },
 };
 
