@@ -25,12 +25,12 @@ const enResources = {
     status: "Status",
     actions: "Actions",
     admin: "Admin",
-    
+
     // Statuses
     available: "Available",
     occupied: "Occupied",
     maintenance: "Maintenance",
-    
+
     // Dashboard
     totalSpaces: "Total Spaces",
     occupiedSpaces: "Occupied",
@@ -48,7 +48,7 @@ const enResources = {
     daysUntilExpiry: "days until expiry",
     area: "Area",
     list: "List",
-    
+
     // Parking spaces
     addParkingSpace: "Add Parking Space",
     spaceNumber: "Space Number",
@@ -57,7 +57,7 @@ const enResources = {
     licensePlate: "License Plate",
     householdNumber: "Household Number",
     spaceManagement: "Parking Space Management",
-    
+
     // Rentals
     newRental: "New Rental",
     startDate: "Start Date",
@@ -66,7 +66,7 @@ const enResources = {
     rentalAdded: "New rental added",
     rentalEnded: "Rental ended",
     spaceUpdated: "Space information updated",
-    
+
     // Validation
     required: "This field is required",
     startDateAfterToday: "Start date must be today or later",
@@ -74,15 +74,15 @@ const enResources = {
     duplicateSpaceNumber: "Space number already exists",
     duplicateHouseholdNumber: "Household number already exists",
     spaceNotAvailable: "Space is not available",
-    
+
     // Notifications
     notificationTitle: "Notification",
     successTitle: "Success",
     errorTitle: "Error",
     warningTitle: "Warning",
-    
+
     // System messages
-    systemTitle: "Community Parking Management System"
+    systemTitle: "Taipei Sydney Temporary Parking Rental System",
   },
 };
 
@@ -110,12 +110,12 @@ const zhResources = {
     status: "狀態",
     actions: "操作",
     admin: "管理員",
-    
+
     // Statuses
     available: "可用",
     occupied: "已租用",
     maintenance: "維修中",
-    
+
     // Dashboard
     totalSpaces: "總車位",
     occupiedSpaces: "已租用",
@@ -133,7 +133,7 @@ const zhResources = {
     daysUntilExpiry: "天後到期",
     area: "區域",
     list: "列表",
-    
+
     // Parking spaces
     addParkingSpace: "新增車位",
     spaceNumber: "車位號碼",
@@ -142,7 +142,7 @@ const zhResources = {
     licensePlate: "車牌號碼",
     householdNumber: "戶號",
     spaceManagement: "車位管理",
-    
+
     // Rentals
     newRental: "新增租借",
     startDate: "開始日期",
@@ -151,7 +151,7 @@ const zhResources = {
     rentalAdded: "新增租借",
     rentalEnded: "租約結束",
     spaceUpdated: "車位資訊更新",
-    
+
     // Validation
     required: "此欄位為必填",
     startDateAfterToday: "開始日期不能早於今天",
@@ -159,30 +159,28 @@ const zhResources = {
     duplicateSpaceNumber: "車位號碼已存在",
     duplicateHouseholdNumber: "戶號已存在",
     spaceNotAvailable: "車位不可用",
-    
+
     // Notifications
     notificationTitle: "通知",
     successTitle: "成功",
     errorTitle: "錯誤",
     warningTitle: "警告",
-    
+
     // System messages
-    systemTitle: "社區停車場管理系統"
+    systemTitle: "台北雪黎灣停車位臨時租借系統",
   },
 };
 
-i18n
-  .use(initReactI18next)
-  .init({
-    resources: {
-      en: enResources,
-      zh: zhResources,
-    },
-    lng: "zh", // Default language
-    fallbackLng: "en",
-    interpolation: {
-      escapeValue: false, // React already escapes values
-    },
-  });
+i18n.use(initReactI18next).init({
+  resources: {
+    en: enResources,
+    zh: zhResources,
+  },
+  lng: "zh", // Default language
+  fallbackLng: "en",
+  interpolation: {
+    escapeValue: false, // React already escapes values
+  },
+});
 
 export default i18n;
