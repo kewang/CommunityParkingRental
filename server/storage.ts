@@ -21,6 +21,9 @@ import {
   parkingOffers
 } from "@shared/schema";
 import { eq, and, desc, asc, gte, lte, count, sql } from "drizzle-orm";
+import dotenv from "dotenv";
+
+dotenv.config();
 
 export interface IStorage {
   // Parking Space methods
