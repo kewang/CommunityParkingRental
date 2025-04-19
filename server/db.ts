@@ -9,7 +9,7 @@ if (!process.env.DATABASE_URL) {
 }
 
 // 建立連接池
-let pool: Pool | null = null;
+let pool: ReturnType<typeof pg.Pool> | null = null;
 let db: any = null;
 
 // 初始化數據庫 (只在有 DATABASE_URL 時)

@@ -526,20 +526,23 @@ export class DatabaseStorage implements IStorage {
   // Parking Space methods
   async getAllParkingSpaces(): Promise<ParkingSpace[]> {
     const { db } = await import('./db');
-    return await db.select().from(schema.parkingSpaces);
+    const { parkingSpaces } = await import('@shared/schema');
+    return await db.select().from(parkingSpaces);
   }
 
   async getParkingSpaceById(id: number): Promise<ParkingSpace | undefined> {
     const { db } = await import('./db');
+    const { parkingSpaces } = await import('@shared/schema');
     const { eq } = await import('drizzle-orm');
-    const [space] = await db.select().from(schema.parkingSpaces).where(eq(schema.parkingSpaces.id, id));
+    const [space] = await db.select().from(parkingSpaces).where(eq(parkingSpaces.id, id));
     return space;
   }
 
   async getParkingSpaceByNumber(spaceNumber: string): Promise<ParkingSpace | undefined> {
     const { db } = await import('./db');
+    const { parkingSpaces } = await import('@shared/schema');
     const { eq } = await import('drizzle-orm');
-    const [space] = await db.select().from(schema.parkingSpaces).where(eq(schema.parkingSpaces.spaceNumber, spaceNumber));
+    const [space] = await db.select().from(parkingSpaces).where(eq(parkingSpaces.spaceNumber, spaceNumber));
     return space;
   }
 
@@ -830,7 +833,12 @@ export class DatabaseStorage implements IStorage {
 
   async createActivityLog(log: InsertActivityLog): Promise<ActivityLog> {
     const { db } = await import('./db');
-    const [newLog] = await db.insert(schema.activityLogs).values(log).returning();
+    const { activityLogs } = await import('@shared/schema');
+    const [newLog] = await db.insert(activityLogs).values({
+      ...log,
+      relatedId: log.relatedId || null,
+      timestamp: new Date()
+    }).returning();
     return newLog;
   }
   
@@ -900,23 +908,27 @@ export class DatabaseStorage implements IStorage {
   // Rental Request methods (for simplified parking system)
   async getAllRentalRequests(): Promise<RentalRequest[]> {
     const { db } = await import('./db');
+    const { rentalRequests } = await import('@shared/schema');
     const { desc } = await import('drizzle-orm');
-    return await db.select().from(schema.rentalRequests).orderBy(desc(schema.rentalRequests.createdAt));
+    return await db.select().from(rentalRequests).orderBy(desc(rentalRequests.createdAt));
   }
 
   async getRentalRequestById(id: number): Promise<RentalRequest | undefined> {
     const { db } = await import('./db');
+    const { rentalRequests } = await import('@shared/schema');
     const { eq } = await import('drizzle-orm');
-    const [request] = await db.select().from(schema.rentalRequests).where(eq(schema.rentalRequests.id, id));
+    const [request] = await db.select().from(rentalRequests).where(eq(rentalRequests.id, id));
     return request;
   }
 
   async createRentalRequest(request: InsertRentalRequest): Promise<RentalRequest> {
     const { db } = await import('./db');
-    const [newRequest] = await db.insert(schema.rentalRequests)
+    const { rentalRequests, REQUEST_STATUS } = await import('@shared/schema');
+    const [newRequest] = await db.insert(rentalRequests)
       .values({
         ...request,
-        status: REQUEST_STATUS.PENDING
+        status: REQUEST_STATUS.PENDING,
+        notes: request.notes || null
       })
       .returning();
     
@@ -932,10 +944,11 @@ export class DatabaseStorage implements IStorage {
 
   async updateRentalRequestStatus(id: number, status: keyof typeof REQUEST_STATUS): Promise<RentalRequest | undefined> {
     const { db } = await import('./db');
+    const { rentalRequests, REQUEST_STATUS } = await import('@shared/schema');
     const { eq } = await import('drizzle-orm');
-    const [updatedRequest] = await db.update(schema.rentalRequests)
+    const [updatedRequest] = await db.update(rentalRequests)
       .set({ status })
-      .where(eq(schema.rentalRequests.id, id))
+      .where(eq(rentalRequests.id, id))
       .returning();
     
     if (updatedRequest) {
@@ -953,24 +966,30 @@ export class DatabaseStorage implements IStorage {
   // Parking Offer methods (for simplified parking system)
   async getParkingOffersByRequestId(requestId: number): Promise<ParkingOffer[]> {
     const { db } = await import('./db');
+    const { parkingOffers } = await import('@shared/schema');
     const { eq, desc } = await import('drizzle-orm');
-    return await db.select().from(schema.parkingOffers)
-      .where(eq(schema.parkingOffers.requestId, requestId))
-      .orderBy(desc(schema.parkingOffers.createdAt));
+    return await db.select().from(parkingOffers)
+      .where(eq(parkingOffers.requestId, requestId))
+      .orderBy(desc(parkingOffers.createdAt));
   }
 
   async createParkingOffer(offer: InsertParkingOffer): Promise<ParkingOffer> {
     const { db } = await import('./db');
+    const { parkingOffers, rentalRequests, REQUEST_STATUS } = await import('@shared/schema');
     const { eq } = await import('drizzle-orm');
     
     // 事務方法確保所有操作要麼一起成功，要麼一起失敗
     async function transaction() {
-      const [newOffer] = await db.insert(schema.parkingOffers).values(offer).returning();
+      const [newOffer] = await db.insert(parkingOffers).values({
+        ...offer,
+        notes: offer.notes || null,
+        createdAt: new Date()
+      }).returning();
       
       // 更新相關租借請求狀態為已匹配
-      await db.update(schema.rentalRequests)
+      await db.update(rentalRequests)
         .set({ status: REQUEST_STATUS.MATCHED })
-        .where(eq(schema.rentalRequests.id, offer.requestId));
+        .where(eq(rentalRequests.id, offer.requestId));
       
       return newOffer;
     }
