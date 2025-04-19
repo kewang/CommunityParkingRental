@@ -55,15 +55,11 @@ const OfferParking = () => {
   const [match, params] = useRoute<{ requestId: string }>("/offer-parking/:requestId");
   const requestId = match ? params.requestId : null;
 
-  // 使用API端點獲取所有租借請求，然後在前端過濾
-  // 看來服務端未正確實現針對單個ID的過濾，始終返回數組
-  const { data: requestsData, isLoading, error } = useQuery<RentalRequest[]>({
-    queryKey: ['/api/rental-requests'],
+  // 使用正確的API端點獲取特定ID的租借請求
+  const { data: requestData, isLoading, error } = useQuery<RentalRequest>({
+    queryKey: [`/api/rental-requests/${requestId}`],
     enabled: !!requestId
   });
-  
-  // 找到與 requestId 匹配的請求
-  const requestData = requestsData?.find(req => req.id === Number(requestId));
   
   // 調試信息
   useEffect(() => {
@@ -227,32 +223,7 @@ const OfferParking = () => {
     );
   }
   
-  // 如果數據已加載但未找到對應 ID 的租借請求
-  if (!isLoading && !error && requestsData && !requestData) {
-    return (
-      <div className="container max-w-md mx-auto py-10">
-        <Card>
-          <CardHeader>
-            <CardTitle>找不到租借請求</CardTitle>
-            <CardDescription>
-              此租借請求可能已過期或被刪除
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <Alert className="mb-4" variant="destructive">
-              <AlertTitle>無效的請求</AlertTitle>
-              <AlertDescription>
-                找不到 ID 為 {requestId} 的租借請求，請確認連結是否正確。
-              </AlertDescription>
-            </Alert>
-            <Button className="w-full" onClick={() => window.location.href = "/"}>
-              返回首頁
-            </Button>
-          </CardContent>
-        </Card>
-      </div>
-    );
-  }
+  // 不需要特殊檢查 404 錯誤，因為我們已經有錯誤處理邏輯
 
   // 顯示主要頁面內容
   return (
