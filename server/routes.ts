@@ -29,6 +29,28 @@ const validateRequest = (schema: any) => {
 export async function registerRoutes(app: Express): Promise<Server> {
   const httpServer = createServer(app);
   
+  // 数据库健康检查路由 (用于 Heroku 部署)
+  app.get('/api/health', async (req, res) => {
+    try {
+      const { testConnection } = await import('./db');
+      const isConnected = await testConnection();
+      
+      res.json({
+        status: 'ok',
+        db: isConnected ? 'connected' : 'disconnected',
+        memory: 'available',
+        env: process.env.NODE_ENV || 'development',
+        storage: process.env.DATABASE_URL ? 'postgresql' : 'memory'
+      });
+    } catch (error) {
+      res.status(500).json({ 
+        status: 'error',
+        message: 'Health check failed',
+        detail: error instanceof Error ? error.message : String(error)
+      });
+    }
+  });
+  
   // ==== Parking Space Routes ====
   
   // Get all parking spaces

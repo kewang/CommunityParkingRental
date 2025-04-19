@@ -1,4 +1,5 @@
-import { Pool } from 'pg';
+import pg from 'pg';
+const { Pool } = pg;
 import { drizzle } from 'drizzle-orm/node-postgres';
 import * as schema from "@shared/schema";
 
@@ -25,10 +26,12 @@ if (process.env.DATABASE_URL) {
     };
     
     // 如果是生產環境（通常是 Heroku），需要啟用 SSL
-    if (process.env.NODE_ENV === 'production') {
+    // Heroku 會自動設置 DATABASE_URL，但需要特殊的 SSL 配置
+    if (process.env.NODE_ENV === 'production' || process.env.DATABASE_URL?.includes('heroku')) {
       config.ssl = {
         rejectUnauthorized: false // Heroku 需要此設置
       };
+      console.log('Enabling SSL for Heroku PostgreSQL');
     }
     
     pool = new Pool(config);
