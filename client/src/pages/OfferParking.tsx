@@ -58,8 +58,26 @@ const OfferParking = () => {
   // 獲取租借請求資訊
   const { data: requestData, isLoading, error } = useQuery<RentalRequest>({
     queryKey: ['/api/rental-requests', requestId],
-    enabled: !!requestId,
+    enabled: !!requestId
   });
+  
+  // 調試信息
+  useEffect(() => {
+    if (requestData) {
+      console.log("租借請求數據:", requestData);
+      console.log("數據類型:", Array.isArray(requestData) ? "陣列" : typeof requestData);
+      if (Array.isArray(requestData)) {
+        console.log("陣列長度:", requestData.length);
+        console.log("第一個元素:", requestData[0]);
+      }
+    }
+  }, [requestData]);
+  
+  useEffect(() => {
+    if (error) {
+      console.error("獲取租借請求失敗:", error);
+    }
+  }, [error]);
 
   // 初始化表單
   const form = useForm<ParkingOfferValues>({
@@ -110,14 +128,24 @@ const OfferParking = () => {
   };
 
   // 格式化日期
-  const formatDate = (dateString: string) => {
+  const formatDate = (dateString: string | undefined | null) => {
     try {
+      if (!dateString) {
+        return "---";
+      }
+      
       // 移除時間部分，只保留日期
-      const datePart = dateString.split('T')[0];
-      return format(new Date(datePart), "yyyy/MM/dd");
+      const datePart = typeof dateString === 'string' ? dateString.split('T')[0] : dateString;
+      
+      // 如果不是有效的日期格式，返回原始字符串
+      if (!/^\d{4}-\d{2}-\d{2}/.test(String(datePart))) {
+        return String(dateString);
+      }
+      
+      return format(new Date(String(datePart)), "yyyy/MM/dd");
     } catch (error) {
       console.error("日期格式化錯誤:", error);
-      return dateString; // 返回原始字符串，以防萬一
+      return String(dateString || "---"); // 返回原始字符串，以防萬一
     }
   };
 
