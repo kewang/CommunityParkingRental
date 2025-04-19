@@ -278,7 +278,7 @@ const OfferParking = () => {
                 
                 {/* 申請階段 */}
                 <div className="mb-6 relative">
-                  <div className="absolute left-[-22px] bg-primary rounded-full p-1.5 border-4 border-white shadow-sm">
+                  <div className="absolute left-[-39px] bg-primary rounded-full p-1.5 border-4 border-white shadow-sm">
                     <Clipboard className="h-3 w-3 text-white" />
                   </div>
                   <div className="font-medium text-sm">租借申請</div>
@@ -299,7 +299,7 @@ const OfferParking = () => {
                 
                 {/* 確認車位階段 */}
                 <div className="relative">
-                  <div className="absolute left-[-22px] bg-green-500 rounded-full p-1.5 border-4 border-white shadow-sm">
+                  <div className="absolute left-[-39px] bg-green-500 rounded-full p-1.5 border-4 border-white shadow-sm">
                     <CheckCircle2 className="h-3 w-3 text-white" />
                   </div>
                   <div className="font-medium text-sm">車位確認</div>
