@@ -23,6 +23,76 @@
     
     <!-- 主題顏色 -->
     <meta name="theme-color" content="#0070f3" />
+    
+    <!-- 動態 Meta 標籤處理腳本 -->
+    <script type="text/javascript">
+      // 檢查是否是 offer-parking 頁面
+      if (window.location.pathname.includes('/offer-parking/')) {
+        // 擷取請求 ID
+        const requestId = window.location.pathname.split('/').pop();
+        
+        // 動態加載租借請求數據並更新 meta 標籤
+        window.addEventListener('DOMContentLoaded', function() {
+          fetch(`/api/rental-requests/${requestId}`)
+            .then(response => {
+              if (!response.ok) {
+                throw new Error('無法加載租借請求數據');
+              }
+              return response.json();
+            })
+            .then(data => {
+              // 格式化日期
+              function formatDate(dateString) {
+                if (!dateString) return "---";
+                const datePart = dateString.split('T')[0];
+                if (!/^\d{4}-\d{2}-\d{2}/.test(datePart)) return dateString;
+                
+                const date = new Date(datePart);
+                return `${date.getFullYear()}/${(date.getMonth() + 1).toString().padStart(2, '0')}/${date.getDate().toString().padStart(2, '0')}`;
+              }
+              
+              // 更新頁面標題
+              document.title = `提供停車位給 ${data.name} | 台北雪黎灣停車位短租系統`;
+              
+              // 生成描述內容
+              const descriptionContent = `${data.name} 正在尋找停車位從 ${formatDate(data.startDate)} 到 ${formatDate(data.endDate)}，車牌號碼 ${data.licensePlate}。請確認是否能提供您的車位。`;
+              
+              // 更新 meta 標籤
+              const metaTags = {
+                'description': descriptionContent,
+                'og:title': `提供停車位給 ${data.name} | 台北雪黎灣停車位短租系統`,
+                'og:description': descriptionContent,
+                'twitter:title': `提供停車位給 ${data.name} | 台北雪黎灣停車位短租系統`,
+                'twitter:description': descriptionContent
+              };
+              
+              // 更新所有 meta 標籤
+              Object.keys(metaTags).forEach(key => {
+                // 確定是否是 property 或 name 屬性
+                const isProperty = key.startsWith('og:') || key.startsWith('twitter:');
+                const selector = isProperty ? `meta[property="${key}"]` : `meta[name="${key}"]`;
+                
+                const metaTag = document.querySelector(selector);
+                if (metaTag) {
+                  metaTag.setAttribute('content', metaTags[key]);
+                } else {
+                  const newTag = document.createElement('meta');
+                  if (isProperty) {
+                    newTag.setAttribute('property', key);
+                  } else {
+                    newTag.setAttribute('name', key);
+                  }
+                  newTag.setAttribute('content', metaTags[key]);
+                  document.head.appendChild(newTag);
+                }
+              });
+            })
+            .catch(error => {
+              console.error('更新 Meta 標籤錯誤:', error);
+            });
+        });
+      }
+    </script>
   </head>
   <body>
     <div id="root"></div>
