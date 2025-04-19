@@ -15,7 +15,7 @@ let db: any = null;
 // 初始化數據庫 (只在有 DATABASE_URL 時)
 if (process.env.DATABASE_URL) {
   try {
-    console.log("Initializing database connection...");
+    console.log("Initializing database connection with URL:", process.env.DATABASE_URL.replace(/\/\/.*:.*@/, '//***:***@'));
     
     // 處理 Heroku 的 SSL 要求
     const config: any = {
@@ -32,10 +32,21 @@ if (process.env.DATABASE_URL) {
         rejectUnauthorized: false // Heroku 需要此設置
       };
       console.log('Enabling SSL for Heroku PostgreSQL');
+    } else {
+      // 即使非 Heroku 環境，如果連接到 Heroku 資料庫，也啟用 SSL
+      config.ssl = {
+        rejectUnauthorized: false
+      };
+      console.log('Enabling SSL for external PostgreSQL connection');
     }
     
     pool = new Pool(config);
     db = drizzle(pool, { schema });
+    
+    // 註冊 pool 錯誤處理，以便捕獲所有連接錯誤
+    pool.on('error', (err) => {
+      console.error('Unexpected error on idle client', err);
+    });
     
     // 測試連接
     testConnection();

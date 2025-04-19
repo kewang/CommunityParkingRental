@@ -922,24 +922,72 @@ export class DatabaseStorage implements IStorage {
   }
 
   async createRentalRequest(request: InsertRentalRequest): Promise<RentalRequest> {
-    const { db } = await import('./db');
-    const { rentalRequests, REQUEST_STATUS } = await import('@shared/schema');
-    const [newRequest] = await db.insert(rentalRequests)
-      .values({
-        ...request,
-        status: REQUEST_STATUS.PENDING,
-        notes: request.notes || null
-      })
-      .returning();
-    
-    // Log the activity
-    await this.createActivityLog({
-      activityType: "REQUEST_CREATED",
-      description: `新增租借申請: ${request.name} (${request.licensePlate})`,
-      relatedId: newRequest.id
-    });
-    
-    return newRequest;
+    try {
+      console.log("Creating rental request with data:", {
+        name: request.name,
+        contact: request.contact,
+        licensePlate: request.licensePlate,
+        startDateType: typeof request.startDate,
+        startDate: request.startDate,
+        endDateType: typeof request.endDate,
+        endDate: request.endDate,
+        notes: request.notes
+      });
+      
+      const { db } = await import('./db');
+      const { rentalRequests, REQUEST_STATUS } = await import('@shared/schema');
+      
+      // 確保日期格式正確
+      let startDate = request.startDate;
+      let endDate = request.endDate;
+      
+      // 如果日期是字符串，轉換為 Date 對象
+      if (typeof startDate === 'string') {
+        startDate = new Date(startDate);
+      }
+      if (typeof endDate === 'string') {
+        endDate = new Date(endDate);
+      }
+      
+      // 日期只保留日期部分，不包含時間
+      if (startDate instanceof Date) {
+        startDate = new Date(startDate.toISOString().split('T')[0]);
+      }
+      if (endDate instanceof Date) {
+        endDate = new Date(endDate.toISOString().split('T')[0]);
+      }
+      
+      console.log("Processed dates:", { 
+        startDate, 
+        endDate, 
+        startDateIso: startDate instanceof Date ? startDate.toISOString() : 'Not a Date',
+        endDateIso: endDate instanceof Date ? endDate.toISOString() : 'Not a Date'
+      });
+      
+      const [newRequest] = await db.insert(rentalRequests)
+        .values({
+          ...request,
+          startDate,
+          endDate,
+          status: REQUEST_STATUS.PENDING,
+          notes: request.notes || null
+        })
+        .returning();
+      
+      console.log("Successfully created rental request:", newRequest);
+      
+      // Log the activity
+      await this.createActivityLog({
+        activityType: "REQUEST_CREATED",
+        description: `新增租借申請: ${request.name} (${request.licensePlate})`,
+        relatedId: newRequest.id
+      });
+      
+      return newRequest;
+    } catch (error) {
+      console.error("Error creating rental request:", error);
+      throw error;
+    }
   }
 
   async updateRentalRequestStatus(id: number, status: keyof typeof REQUEST_STATUS): Promise<RentalRequest | undefined> {
@@ -974,36 +1022,73 @@ export class DatabaseStorage implements IStorage {
   }
 
   async createParkingOffer(offer: InsertParkingOffer): Promise<ParkingOffer> {
-    const { db } = await import('./db');
-    const { parkingOffers, rentalRequests, REQUEST_STATUS } = await import('@shared/schema');
-    const { eq } = await import('drizzle-orm');
-    
-    // 事務方法確保所有操作要麼一起成功，要麼一起失敗
-    async function transaction() {
-      const [newOffer] = await db.insert(parkingOffers).values({
-        ...offer,
-        notes: offer.notes || null,
-        createdAt: new Date()
-      }).returning();
+    try {
+      console.log("Creating parking offer with data:", {
+        requestId: offer.requestId,
+        spaceNumber: offer.spaceNumber,
+        ownerName: offer.ownerName,
+        ownerContact: offer.ownerContact,
+        notes: offer.notes
+      });
       
-      // 更新相關租借請求狀態為已匹配
-      await db.update(rentalRequests)
-        .set({ status: REQUEST_STATUS.MATCHED })
-        .where(eq(rentalRequests.id, offer.requestId));
+      const { db } = await import('./db');
+      const { parkingOffers, rentalRequests, REQUEST_STATUS } = await import('@shared/schema');
+      const { eq } = await import('drizzle-orm');
       
+      // 事務方法確保所有操作要麼一起成功，要麼一起失敗
+      async function transaction() {
+        try {
+          console.log("Beginning transaction for parking offer");
+          
+          // 檢查申請是否存在
+          const request = await db.select().from(rentalRequests)
+                              .where(eq(rentalRequests.id, offer.requestId))
+                              .limit(1);
+          
+          console.log("Found rental request:", request);
+          
+          if (!request || request.length === 0) {
+            throw new Error(`租借申請不存在，ID: ${offer.requestId}`);
+          }
+          
+          const [newOffer] = await db.insert(parkingOffers).values({
+            ...offer,
+            notes: offer.notes || null,
+            createdAt: new Date()
+          }).returning();
+          
+          console.log("Inserted new parking offer:", newOffer);
+          
+          // 更新相關租借請求狀態為已匹配
+          const [updatedRequest] = await db.update(rentalRequests)
+            .set({ status: REQUEST_STATUS.MATCHED })
+            .where(eq(rentalRequests.id, offer.requestId))
+            .returning();
+          
+          console.log("Updated related rental request status:", updatedRequest);
+          
+          return newOffer;
+        } catch (error) {
+          console.error("Transaction error:", error);
+          throw error;
+        }
+      }
+      
+      const newOffer = await transaction();
+      
+      // Log the activity
+      await this.createActivityLog({
+        activityType: "OFFER_CREATED",
+        description: `車位提供: ${offer.ownerName} 提供車位 ${offer.spaceNumber} 給請求 ${offer.requestId}`,
+        relatedId: newOffer.id
+      });
+      
+      console.log("Successfully created parking offer with ID:", newOffer.id);
       return newOffer;
+    } catch (error) {
+      console.error("Error creating parking offer:", error);
+      throw error;
     }
-    
-    const newOffer = await transaction();
-    
-    // Log the activity
-    await this.createActivityLog({
-      activityType: "OFFER_CREATED",
-      description: `新增車位提供: ${offer.spaceNumber} 提供給申請ID ${offer.requestId}`,
-      relatedId: newOffer.id
-    });
-    
-    return newOffer;
   }
 }
 
