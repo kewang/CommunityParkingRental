@@ -8,13 +8,35 @@ import {
   Settings,
   ClipboardList
 } from "lucide-react";
+import { useQuery } from "@tanstack/react-query";
 
 interface SidebarProps {
   activePath: string;
 }
 
+// 定義租借請求類型
+interface RentalRequest {
+  id: number;
+  name: string;
+  contact: string;
+  licensePlate: string;
+  startDate: string;
+  endDate: string;
+  notes: string | null;
+  status: string;
+  createdAt: string;
+}
+
 const Sidebar = ({ activePath }: SidebarProps) => {
   const { t } = useTranslation();
+  
+  // 獲取所有待處理的租借請求
+  const { data: requests } = useQuery<RentalRequest[]>({
+    queryKey: ["/api/rental-requests"],
+  });
+  
+  // 過濾只顯示待處理的請求 (PENDING 狀態)
+  const pendingCount = requests?.filter(req => req.status === "PENDING")?.length || 0;
   
   // Helper function to determine if a path is active
   const isActive = (path: string) => {
@@ -26,7 +48,12 @@ const Sidebar = ({ activePath }: SidebarProps) => {
   // Navigation items
   const navItems = [
     { path: '/create-rental', icon: <Car className="w-5 h-5" />, label: '申請租車位' },
-    { path: '/pending-requests', icon: <ClipboardList className="w-5 h-5" />, label: '目前待租借' },
+    { 
+      path: '/pending-requests', 
+      icon: <ClipboardList className="w-5 h-5" />, 
+      label: '目前待租借', 
+      count: pendingCount 
+    },
   ];
   
   return (
@@ -44,7 +71,12 @@ const Sidebar = ({ activePath }: SidebarProps) => {
                 }`}
               >
                 <span className="w-6">{item.icon}</span>
-                <span>{item.label}</span>
+                <span className="flex-1">{item.label}</span>
+                {typeof item.count !== 'undefined' && item.count > 0 && (
+                  <span className="ml-2 bg-primary text-white text-xs rounded-full px-2 py-0.5 min-w-[20px] text-center">
+                    {item.count}
+                  </span>
+                )}
               </div>
             </li>
           ))}

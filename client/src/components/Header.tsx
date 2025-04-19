@@ -1,7 +1,6 @@
 import { useTranslation } from "react-i18next";
-import { Bell } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { useState, useEffect } from "react";
+import { useEffect } from "react";
 
 interface HeaderProps {
   lang: "zh" | "en";
@@ -10,7 +9,6 @@ interface HeaderProps {
 
 const Header = ({ lang, setLang }: HeaderProps) => {
   const { t, i18n } = useTranslation();
-  const [notificationCount, setNotificationCount] = useState(3);
   
   // Toggle language
   const toggleLanguage = () => {
@@ -41,27 +39,7 @@ const Header = ({ lang, setLang }: HeaderProps) => {
           </h1>
         </div>
         
-        <div className="flex items-center space-x-4">
-          <div className="relative">
-            <Button variant="ghost" size="icon" className="rounded-full">
-              <Bell className="h-5 w-5 text-[#605E5C]" />
-              {notificationCount > 0 && (
-                <span className="absolute top-0 right-0 bg-[#D83B01] text-white text-xs rounded-full h-4 w-4 flex items-center justify-center">
-                  {notificationCount}
-                </span>
-              )}
-            </Button>
-          </div>
-          
-          <div className="flex items-center">
-            <span className="mr-2">{t("admin")}</span>
-            <div className="flex items-center justify-center w-8 h-8 rounded-full bg-primary text-white">
-              <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
-                <path fillRule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clipRule="evenodd" />
-              </svg>
-            </div>
-          </div>
-          
+        <div className="flex items-center">
           <Button 
             variant="outline" 
             size="sm" 
