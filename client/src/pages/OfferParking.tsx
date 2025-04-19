@@ -23,7 +23,8 @@ import {
 import { format } from "date-fns";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
-import { CheckCircle2, Car, Calendar, User } from "lucide-react";
+import { CheckCircle2, Car, Calendar, User, Clock, Clipboard } from "lucide-react";
+import { cn } from "@/lib/utils";
 
 // 定義表單驗證規則
 const parkingOfferSchema = z.object({
@@ -249,6 +250,58 @@ const OfferParking = () => {
               </AlertDescription>
             </Alert>
             
+            {/* 租借歷程時間線 */}
+            <div className="border rounded-md p-4 bg-gray-50 mb-4">
+              <h3 className="font-medium mb-3 text-gray-700">租借歷程</h3>
+              <div className="relative pl-8 pb-1">
+                {/* 連接線 */}
+                <div className="absolute left-3 top-2 bottom-0 w-0.5 bg-gray-200"></div>
+                
+                {/* 申請階段 */}
+                <div className="mb-6 relative">
+                  <div className="absolute left-[-24px] bg-primary rounded-full p-1.5 border-4 border-white shadow-sm">
+                    <Clipboard className="h-3 w-3 text-white" />
+                  </div>
+                  <div className="font-medium text-sm">租借申請</div>
+                  <div className="text-xs text-gray-500 mt-1">
+                    申請人 {requestData.name} 於 {formatDate(requestData.createdAt)} 提出租借申請
+                  </div>
+                  <div className="bg-white p-2 mt-2 rounded-md text-xs border border-gray-100">
+                    <div className="flex items-center gap-1 mb-1">
+                      <Calendar className="h-3 w-3 text-primary" />
+                      <span>租借期間: {formatDate(requestData.startDate)} - {formatDate(requestData.endDate)}</span>
+                    </div>
+                    <div className="flex items-center gap-1">
+                      <Car className="h-3 w-3 text-primary" />
+                      <span>車牌號碼: {requestData.licensePlate}</span>
+                    </div>
+                  </div>
+                </div>
+                
+                {/* 確認車位階段 */}
+                <div className="relative">
+                  <div className="absolute left-[-24px] bg-green-500 rounded-full p-1.5 border-4 border-white shadow-sm">
+                    <CheckCircle2 className="h-3 w-3 text-white" />
+                  </div>
+                  <div className="font-medium text-sm">車位確認</div>
+                  <div className="text-xs text-gray-500 mt-1">
+                    車位擁有者 {form.getValues("ownerName")} 於 {formatDate(new Date().toISOString())} 確認提供車位
+                  </div>
+                  <div className="bg-white p-2 mt-2 rounded-md text-xs border border-gray-100">
+                    <div className="flex items-center gap-1 mb-1">
+                      <Car className="h-3 w-3 text-primary" />
+                      <span>車位編號: {form.getValues("spaceNumber")}</span>
+                    </div>
+                    <div className="flex items-center gap-1">
+                      <User className="h-3 w-3 text-primary" />
+                      <span>聯絡方式: {form.getValues("ownerContact")}</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+            
+            {/* 租借資訊卡片 */}
             <div className="border rounded-md p-4 bg-gray-50">
               <h3 className="font-medium mb-3 text-gray-700">租借資訊</h3>
               <div className="space-y-3">
